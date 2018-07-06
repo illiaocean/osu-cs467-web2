@@ -18,6 +18,8 @@
   "homepage": "https://github.com/abdullaiev/osu-cs467-web2#readme",
   "devDependencies": {
     "express": "^4.16.2",
-    "forever": "^0.15.3"
+    "forever": "^0.15.3",
+    "websocket": "^1.0.26",
+    "express-ws": "^4.0.0"
   }
 }

@@ -13,5 +13,5 @@ Andrius V Kelly
 
 cd to project folder
 `npm i`
-`node index <port_number>`
-Then open `localhost:<port_number>` in your browser of choice.
+`node index 12345`
+Then open `localhost:12345` in your browser of choice.
