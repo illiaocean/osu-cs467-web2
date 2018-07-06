@@ -1,0 +1,19 @@
+{
+  "name": "web2",
+  "version": "1.0.0",
+  "description": "Graphical WEB Crawler",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdullaiev/osu-cs467-web2.git"
+  },
+  "author": "Illia Abdullaiev, Sergio Pedroza, Andrius V Kelly",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abdullaiev/osu-cs467-web2/issues"
+  },
+  "homepage": "https://github.com/abdullaiev/osu-cs467-web2#readme"
+}
