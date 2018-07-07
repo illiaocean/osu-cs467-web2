@@ -8,8 +8,17 @@ app.use(express.static(__dirname + '/public'));
 //client-server communication via websockets
 app.ws('/', function(ws) {
     ws.on('message', function(msg) {
-        console.log(msg);
-        ws.send("Hello from the server!");
+        console.log("Server received message", msg);
+        msg = JSON.parse(msg);
+
+        if (msg.code === 'search') {
+            //notify the client that request has been accepted
+            ws.send(JSON.stringify({code: "searching"}));
+
+            //todo: perform search
+            //msg.data will contain search query parameters. Here's an example:
+            //{url: "google.com", searchMethod: "BFS", stopKeyword: "Oregon", size: "100"}
+        }
     });
 });
 

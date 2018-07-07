@@ -4,13 +4,87 @@
     <meta charset="UTF-8">
     <title>WEB2: GRAPHICAL CRAWLER</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+          crossorigin="anonymous">
 </head>
 
 <body>
-    WEB2 GRAPHICAL CRAWLER
-    <section id="user-input"></section>
-    <section id="progress"></section>
-    <section id="results"></section>
+    <section id="search-form">
+        <h4>WEB2 GRAPHICAL CRAWLER</h4>
+        <form>
+            <div class="form-group">
+                <label for="url">Start at:</label>
+                <input type="text"
+                       class="form-control"
+                       id="url"
+                       name="url"
+                       placeholder="google.com"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>Search method:</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="searchMethod"
+                           id="BFS"
+                           value="BFS"
+                           checked>
+                    <label class="form-check-label" for="BFS">BFS</label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="searchMethod"
+                           id="DFS"
+                           value="DFS">
+                    <label class="form-check-label" for="DFS">DFS</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="stop-keyword">Stop keyword:</label>
+                <input type="text"
+                       class="form-control"
+                       id="stop-keyword"
+                       name="stopKeyword"
+                       placeholder="Oregon">
+            </div>
+
+            <div class="form-group">
+                <label for="size">Graph max size:</label>
+                <input type="number"
+                       class="form-control"
+                       id="size"
+                       name="size"
+                       placeholder="500">
+            </div>
+
+            <button type="submit" class="btn btn-primary">RUN</button>
+        </form>
+    </section>
+
+    <section id="progress" style="display: none">
+        <h5>Search is in progress...</h5>
+    </section>
+    <section id="results" style="display: none"></section>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
+            integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+            crossorigin="anonymous">
+    </script>
     <script src="main.js"></script>
 </body>
 </html>
