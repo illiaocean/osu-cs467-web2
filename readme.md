@@ -11,7 +11,14 @@ Andrius V Kelly
 
 # Running locally
 
-cd to project folder
+cd to project folder and install dependencies:
 `npm i`
+
+`request` is defined as a peer-dependency and thus has to be installed separately:
+`npm install --save request`
+`npm install --save request-promise`
+
+run node server:
 `node index 12345`
+
 Then open `localhost:12345` in your browser of choice.

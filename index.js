@@ -2,12 +2,18 @@ const express = require('express');
 const app = express();
 require('express-ws')(app);
 
+//local files
+const scraper = require('./scraper.js');
+scraper.scrape('http://andriuskelly.com');
+
 app.set('port', process.argv[2]);
 app.use(express.static(__dirname + '/public'));
 
 //client-server communication via websockets
 app.ws('/', function(ws) {
+
     ws.on('message', function(msg) {
+
         console.log("Server received message", msg);
         msg = JSON.parse(msg);
 
@@ -15,9 +21,9 @@ app.ws('/', function(ws) {
             //notify the client that request has been accepted
             ws.send(JSON.stringify({code: "searching"}));
 
-            //todo: perform search
             //msg.data will contain search query parameters. Here's an example:
-            //{url: "google.com", searchMethod: "BFS", stopKeyword: "Oregon", size: "100"}
+            // const jsonString = '{url: "google.com", searchMethod: "BFS", stopKeyword: "Oregon", size: "100"}';
+
         }
     });
 });
