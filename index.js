@@ -2,9 +2,13 @@ const express = require('express');
 const app = express();
 require('express-ws')(app);
 
-//local files
+//scrape object
 const scraper = require('./scraper.js');
-scraper.scrape('http://andriuskelly.com');
+
+//pass in callback function to handle links
+scraper.scrape('http://andriuskelly.com', function(links){console.log("links");});
+
+
 
 app.set('port', process.argv[2]);
 app.use(express.static(__dirname + '/public'));

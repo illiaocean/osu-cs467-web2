@@ -11,7 +11,7 @@ function WebLink(url){
 
 
 //webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
-function scrape(url){
+function scrape(url, callback){
 	//options for request
 	const options = {		
 	  uri: url,
@@ -19,31 +19,41 @@ function scrape(url){
 	    return cheerio.load(body);
 	  }
 	};
+  	
+  	var links = [];
 
 	//calls request, executes promise
 	rp(options)
 	  .then(($) => {
-	    
+
 	    $('a').each( function(i, e){
 	    	var link = $(this).attr('href')
 	    	//if link is self
 	    	if( link.substring(0,2) == './' ){
 	    		link = url + link.substring(1);
 	    	}
-	    	console.log( link )
+
+	    	if( link.startsWith('http') ){
+	    		links.push(link);
+	    	}
 	    });
+    	callback(links)
 	  })
 	  .catch((err) => {
 	    console.log(err);
 	  });
+
+    return links;
 }
 
 //scraper API
 module.exports = {
 
-	scrape: function(url){
+	scrape: function(url, callback){
+
 		console.log("scraping: " + url);
-		scrape(url);
+
+		scrape(url, callback);
 	}
 
 };
