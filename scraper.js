@@ -9,6 +9,16 @@ function WebLink(url){
 		this.webLinks = [];
 }
 
+//scraper API
+module.exports = {
+	scrape: function(url, responseCall){
+
+		console.log("scraping: " + url);
+		scrape(url, responseCall);
+	}
+};
+
+//TODO: impliment BFS, DFS
 
 //webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
 function scrape(url, callback){
@@ -46,15 +56,5 @@ function scrape(url, callback){
     return links;
 }
 
-//scraper API
-module.exports = {
 
-	scrape: function(url, callback){
-
-		console.log("scraping: " + url);
-
-		scrape(url, callback);
-	}
-
-};
 

@@ -6,8 +6,7 @@ require('express-ws')(app);
 const scraper = require('./scraper.js');
 
 //pass in callback function to handle links
-scraper.scrape('http://andriuskelly.com', function(links){console.log("links");});
-
+scraper.scrape('http://andriuskelly.com', function(links){console.log(links);});
 
 
 app.set('port', process.argv[2]);
