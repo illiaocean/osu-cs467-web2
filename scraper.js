@@ -13,7 +13,7 @@ function WebLink(url){
 module.exports = {
 	scrape: function(options, responseCall){
 		console.log("Scraping: " + options.url);
-		scrape(url, responseCall);
+		scrape(options.url, responseCall);
 	}
 };
 
