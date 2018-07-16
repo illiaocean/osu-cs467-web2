@@ -20,7 +20,7 @@ module.exports = {
 
 //TODO: impliment BFS, DFS
 
-//webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
+//webscraping credit: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
 function scrape(url, callback){
 	//options for request
 	const options = {		
