@@ -11,9 +11,8 @@ function WebLink(url){
 
 //scraper API
 module.exports = {
-	scrape: function(url, responseCall){
-
-		console.log("scraping: " + url);
+	scrape: function(options, responseCall){
+		console.log("Scraping: " + options.url);
 		scrape(url, responseCall);
 	}
 };
