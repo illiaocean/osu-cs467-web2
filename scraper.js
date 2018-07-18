@@ -20,9 +20,9 @@ module.exports = {
 		//placeholder:
 		qry = {	
 				url: url, 
-				searchMethod: "DFS", 
+				searchMethod: "bfs", 
 				stopKeyword: "Oregon", 
-				size: "5"
+				size: "2"
 			};
 
 		crawl(qry, serverFunc);
@@ -40,16 +40,64 @@ function crawl(qry, serverFunc){
 
 	var rootNode = new WebLink( qry['url']  )
 
-	const method = qry['searchMethod'].toLowerCase();
-
-	crawlHelper(rootNode, method, depth, visited, function(){
-		serverFunc(rootNode);
-	});
-
+	if ( qry['searchMethod'].toLowerCase() == 'bfs'){
+		bfs(rootNode, depth, function(){
+			serverFunc(rootNode);
+		});
+	}
+	else if ( qry['searchMethod'].toLowerCase() == 'dfs' ) {
+		dfs(rootNode, depth, visited, function(){
+			serverFunc(rootNode);
+		});
+	}
+	else {
+		console.log("scraper.js: Could not parse search method.")
+		serverFunc(null);
+	}
 }
 
 
-function crawlHelper(node, method, depth, visited, callback){
+
+function bfs(root, depth, callback){
+
+	var queue = new Queue();
+	var visited = [];
+
+	queue.enqueue(root);
+	var nodesInLayer = 1;
+
+	while( depth > 0 && !queue.isEmpty() ) {
+
+		--nodesInLayer;
+
+		if(nodesInLayer <= 0){
+			--depth;
+			console.log("depth:" + depth);
+			nodesInLayer = queue.getLength();
+		}
+
+		var node = queue.dequeue();
+		visited.push(node.url);
+
+		scrape(node.url, function(links){
+
+			for (link in links){
+				if( !(link in visited) ){
+					var childNode = new WebLink(link)
+
+					queue.enqueue(childNode);
+					node.webLinks.push( childNode );
+				}
+			}
+		});
+	}
+	callback();
+}
+
+
+
+
+function dfs(node, depth, visited, callback){
 
 	if( depth <= 0 ) { 
 		callback();
@@ -59,36 +107,30 @@ function crawlHelper(node, method, depth, visited, callback){
 	//pass dfs/bfs function to scraper to perform crawl
 	scrape(node.url, function( links ){
 
+		console.log(node.url); 
 		console.log("links: " + links.length + " depth: " + depth);
-// 		//in bfs, add new node for each link
-// 		if ( method == 'bfs'){
-// 			for (link in links){
-// 				if( !(link in visited) ){
-// 					visited.push(link);
-// 					node.webLinks.push( new WebLink(link) );
-// 				}
-// //TODO: bfs needs to add links one layer at a time (to each node)
-// 			}
-// 		}	
-// 		//in dfs, randomly choose link
-// 		else {
-			var index = Math.floor( Math.random() * links.length );
-			//make sure not visited
-			while( links.length > 0 && links[index] in visited ){
-				links.splice(index, 1);
-				index = Math.floor( Math.random() * links.length )
-			}
 
-			if( links.length > 0 ){ 
-				
-				visited.push( links[index] );
+		//in dfs, randomly choose link 
+		var index = Math.floor( Math.random() * links.length );
+		//make sure not visited
+		while( links.length > 0 && links[index] in visited ){
+			links.splice(index, 1);
+			index = Math.floor( Math.random() * links.length )
+		}
 
-				const childNode = new WebLink( links[index] ) 
-				node.webLinks.push( childNode );
-				console.log("crawling " + childNode.url );
-				crawlHelper(childNode, method, depth-1, visited, callback);
-			}
-		// }
+		if( links.length > 0 ){ 
+			
+			visited.push( links[index] );
+
+			const childNode = new WebLink( links[index] ) 
+			node.webLinks.push( childNode );
+
+			dfs(childNode, depth-1, visited, callback);
+		}
+		else {
+			//TODO: handle dead end
+			return;
+		}		
 	});
 }
 
@@ -137,4 +179,5 @@ function scrape(url, callback){
 }
 
 
-
+//Queue implimentation without using shift() from http://code.iamkate.com/javascript/queues/
+function Queue(){var a=[],b=0;this.getLength=function(){return a.length-b};this.isEmpty=function(){return 0==a.length};this.enqueue=function(b){a.push(b)};this.dequeue=function(){if(0!=a.length){var c=a[b];2*++b>=a.length&&(a=a.slice(b),b=0);return c}};this.peek=function(){return 0<a.length?a[b]:void 0}};
