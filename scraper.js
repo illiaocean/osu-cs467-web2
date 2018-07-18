@@ -16,14 +16,7 @@ module.exports = {
 		console.log("scraping: " + url);
 		scrape(url, callback);
 	},
-	crawl: function(url, serverFunc){
-		//placeholder:
-		qry = {	
-				url: url, 
-				searchMethod: "bfs", 
-				stopKeyword: "Oregon", 
-				size: "2"
-			};
+	crawl: function(qry, serverFunc){
 
 		crawl(qry, serverFunc);
 	}

@@ -5,8 +5,15 @@ require('express-ws')(app);
 //scrape object
 const scraper = require('./scraper.js');
 
+//placeholder query:
+qry = { 
+        url: 'https://en.wikipedia.org/wiki/Special:Random', 
+        searchMethod: "bfs", 
+        stopKeyword: "Oregon", 
+        size: "2"
+    };
 //pass in callback function to handle links
-scraper.crawl('https://en.wikipedia.org/wiki/Special:Random', function(links){console.log(links);});
+scraper.crawl(qry, function(links){console.log(links);});
 
 
 app.set('port', process.argv[2]);
