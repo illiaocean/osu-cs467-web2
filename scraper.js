@@ -12,17 +12,17 @@ function WebLink(url){
 //scraper API
 module.exports = {
 
-	scrape: function(url, responseCall){
+	scrape: function(url, callback){
 		console.log("scraping: " + url);
-		scrape(url, "", responseCall);
+		scrape(url, callback);
 	},
-	crawl: function(qry, serverFunc){
+	crawl: function(url, serverFunc){
 		//placeholder:
 		qry = {	
-				url: "https://en.wikipedia.org/wiki/Main_Page", 
+				url: url, 
 				searchMethod: "DFS", 
 				stopKeyword: "Oregon", 
-				size: "10"
+				size: "5"
 			};
 
 		crawl(qry, serverFunc);
@@ -42,37 +42,41 @@ function crawl(qry, serverFunc){
 
 	const method = qry['searchMethod'].toLowerCase();
 
-	//recursive helper
-	crawlHelper(rootNode, method, depth, visited);
+	crawlHelper(rootNode, method, depth, visited, function(){
+		serverFunc(rootNode);
+	});
 
-	serverFunc(rootNode);
 }
 
 
-function crawlHelper(node, method, depth, visited){
-	
-	if( depth <= 0 ) { return; }
+function crawlHelper(node, method, depth, visited, callback){
+
+	if( depth <= 0 ) { 
+		callback();
+		return; 
+	}
 	
 	//pass dfs/bfs function to scraper to perform crawl
 	scrape(node.url, function( links ){
 
-		//in bfs, add new node for each link
-		if ( method == 'bfs'){
-			for (link in links){
-				if( !(link in visited) ){
-					visited.push(link);
-					node.webLinks.push( new WebLink(link) );
-				}
-//TODO: bfs needs to add links one layer at a time (to each node)
-			}
-		}	
-		//in dfs, randomly choose link
-		else {
-			var index = Math.floor( Math.random() * links.length() );
+		console.log("links: " + links.length + " depth: " + depth);
+// 		//in bfs, add new node for each link
+// 		if ( method == 'bfs'){
+// 			for (link in links){
+// 				if( !(link in visited) ){
+// 					visited.push(link);
+// 					node.webLinks.push( new WebLink(link) );
+// 				}
+// //TODO: bfs needs to add links one layer at a time (to each node)
+// 			}
+// 		}	
+// 		//in dfs, randomly choose link
+// 		else {
+			var index = Math.floor( Math.random() * links.length );
 			//make sure not visited
 			while( links.length > 0 && links[index] in visited ){
 				links.splice(index, 1);
-				index = Math.floor( Math.random() * links.length() )
+				index = Math.floor( Math.random() * links.length )
 			}
 
 			if( links.length > 0 ){ 
@@ -81,16 +85,17 @@ function crawlHelper(node, method, depth, visited){
 
 				const childNode = new WebLink( links[index] ) 
 				node.webLinks.push( childNode );
-				crawlHelper(childNode, method, depth-1, visited);
+				console.log("crawling " + childNode.url );
+				crawlHelper(childNode, method, depth-1, visited, callback);
 			}
-		}
+		// }
 	});
 }
 
 //webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
 //scrapes url site and performs callback on each link
 function scrape(url, callback){
-	
+
 	//options for request
 	const options = {		
 	  uri: url,
@@ -100,6 +105,7 @@ function scrape(url, callback){
 	};
   	
   	var links = [];
+  	var link = '';
 
 	//calls request, executes promise
 	rp(options)
@@ -107,18 +113,19 @@ function scrape(url, callback){
 
 //TODO: impliment keyword stop
 
-	    $('a').each( function(i, e){
+	    $('a').each( function(){
 	    	
-	    	var link = $(this).attr('href')
-	    	
-	    	//if link address is self-referenced, insert domain
-	    	if( link.substring(0,2) == './' ){
-	    		link = url + link.substring(1);
-	    	}
-	    	//add unique link
-	    	if( link.startsWith('http') && !links.includes(link)){
-	    		links.push(link);
-	    	}
+	    	if ( link = $(this).attr('href') ) {
+
+		    	//if link address is self-referenced, insert domain
+		    	if( link.substring(0,2) == './' ){
+		    		link = url + link.substring(1);
+		    	}
+		    	//add unique link
+		    	if( link.startsWith('http') && !links.includes(link)){
+		    		links.push(link);
+		    	}
+		    }
 	    });
     	callback(links)
 	  })
