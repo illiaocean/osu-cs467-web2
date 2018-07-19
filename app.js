@@ -6,12 +6,18 @@ const scraper = require('./scraper.js');
 //placeholder query:
 qry = { 
         url: 'https://en.wikipedia.org/wiki/Special:Random', 
-        searchMethod: "bfs", 
+        searchMethod: "dfs", 
         stopKeyword: "Oregon", 
-        size: "2"
+        size: "7"
     };
 //pass in callback function to handle links
-scraper.crawl(qry, function(links){console.log(links);});
+scraper.crawl(qry, function(node){
+    // console.log(node);
+    while(node){
+        console.log(node.url);
+        node = node.webLinks[0];
+    }
+});
 
 require('express-ws')(app);
 
