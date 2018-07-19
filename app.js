@@ -10,9 +10,15 @@ qry = {
         stopKeyword: "Oregon", 
         size: "7"
     };
-//pass in callback function to handle links
+
 scraper.crawl(qry, function(node){
-    // console.log(node);
+
+    //this function will be executed on the node tree result of the dfs/bfs
+    //each node is structured:
+        //node.url is the url of the node
+        //node.webLinks is an array of child nodes
+
+    //example: this will print dfs results 
     while(node){
         console.log(node.url);
         node = node.webLinks[0];
