@@ -19,6 +19,6 @@ cd to project folder and install dependencies:
 `npm install --save request-promise`
 
 run node server:
-`node index 12345`
+`node app 12345`
 
 Then open `localhost:12345` in your browser of choice.
