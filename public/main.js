@@ -18,7 +18,7 @@
                 case '404':
                     handle404();
                 case 'results':
-                    buildGraph(message.data);
+                    showResults(message.data);
 
             }
         };
@@ -69,7 +69,45 @@
 
     }
 
-    function buildGraph() {
+    function showResults(graph) {
+        $progress.hide();
+        $results.show();
+        buildGraph(graph);
+    }
 
+    function buildGraph(graph) {
+        var links = getUniqueLinks(graph);
+        var edges = getGraphEdges(links, graph);
+        var container = document.getElementById('graph');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        var options = {};
+        new vis.Network(container, data, options);
+    }
+
+    function getUniqueLinks(node) {
+        var links = {};
+        //todo: traverse graph
+        var nodes = new vis.DataSet([
+            {id: 1, label: 'Node 1'},
+            {id: 2, label: 'Node 2'},
+            {id: 3, label: 'Node 3'},
+            {id: 4, label: 'Node 4'},
+            {id: 5, label: 'Node 5'}
+        ]);
+
+        return nodes;
+    }
+
+    function getGraphEdges(links, graph) {
+        //todo: use links object to create a dataset of edges
+        return new vis.DataSet([
+            {from: 1, to: 3},
+            {from: 1, to: 2},
+            {from: 2, to: 4},
+            {from: 2, to: 5}
+        ]);
     }
 })();

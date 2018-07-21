@@ -1,22 +1,26 @@
 const express = require('express');
 const app = express();
 const scraper = require('./scraper.js');
+require('express-ws')(app);
 
 
 //placeholder query:
-qry = { 
-        url: 'https://en.wikipedia.org/wiki/Special:Random', 
-        searchMethod: "dfs", 
-        stopKeyword: "Oregon", 
-        size: "7"
-    };
+qry = {
+    url: 'https://en.wikipedia.org/wiki/Special:Random',
+    searchMethod: "dfs",
+    stopKeyword: "Oregon",
+    size: "7"
+};
 
-scraper.crawl(qry, function(node){
+
+scraper.crawl(qry, function (node) {
     //this function will be executed on the node tree result of the dfs/bfs
     
     //each node is structured:
-        //node.url is the url of the node
-        //node.webLinks is an array of child nodes
+    //node.url is the url of the node
+    //node.webLinks is an array of child nodes
+
+    console.log(JSON.stringify(node));
 
     //example: this will print dfs results in order
     while(node){
@@ -25,14 +29,12 @@ scraper.crawl(qry, function(node){
     }
 });
 
-require('express-ws')(app);
-
 app.set('port', process.argv[2]);
 app.use(express.static(__dirname + '/public'));
 
 //client-server communication via websockets
-app.ws('/', function(ws) {
-    ws.on('message', function(msg) {
+app.ws('/', function (ws) {
+    ws.on('message', function (msg) {
         console.log("Server received message", msg);
         msg = JSON.parse(msg);
 
@@ -44,8 +46,13 @@ app.ws('/', function(ws) {
             ws.send(JSON.stringify({code: "searching"}));
 
             //begin search
-            scraper.scrape(msg.data, function(links){
-                console.log(links);
+            scraper.crawl(msg.data, function (node) {
+                //Search has finished. Send results back to the client.
+                var response = {
+                    code: "results",
+                    data: node
+                };
+                ws.send(JSON.stringify(response));
             });
         }
     });

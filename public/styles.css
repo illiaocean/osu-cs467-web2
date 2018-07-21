@@ -13,3 +13,9 @@ body {
 #search-form button {
   width: 100%;
 }
+
+#graph {
+  width: 500px;
+  height: 500px;
+  border: 1px solid grey;
+}
