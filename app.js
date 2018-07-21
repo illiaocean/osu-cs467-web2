@@ -12,13 +12,13 @@ qry = {
     };
 
 scraper.crawl(qry, function(node){
-
     //this function will be executed on the node tree result of the dfs/bfs
+    
     //each node is structured:
         //node.url is the url of the node
         //node.webLinks is an array of child nodes
 
-    //example: this will print dfs results 
+    //example: this will print dfs results in order
     while(node){
         console.log(node.url);
         node = node.webLinks[0];

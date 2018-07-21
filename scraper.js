@@ -17,7 +17,6 @@ module.exports = {
 		scrape(url, callback);
 	},
 	crawl: function(qry, serverFunc){
-
 		crawl(qry, serverFunc);
 	}
 };
