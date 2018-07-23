@@ -3,7 +3,7 @@ const app = express();
 const scraper = require('./scraper.js');
 require('express-ws')(app);
 
-let port = process.argv[2] || 80;
+let port = process.env.PORT || 3000;
 app.set('port', port);
 app.use(express.static(__dirname + '/public'));
 
@@ -39,6 +39,6 @@ app.ws('/', function (ws) {
 app.use(require('./routes/404'));
 app.use(require('./routes/500'));
 
-app.listen(process.env.PORT || 3000, function () {
+app.listen(app.get('port'), function () {
     console.log('Express started on port: ' + app.get('port') + '.');
 });
