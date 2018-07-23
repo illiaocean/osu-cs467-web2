@@ -39,6 +39,6 @@ app.ws('/', function (ws) {
 app.use(require('./routes/404'));
 app.use(require('./routes/500'));
 
-app.listen(app.get('port'), function () {
+app.listen(process.env.PORT || 3000, function () {
     console.log('Express started on port: ' + app.get('port') + '.');
 });
