@@ -25,10 +25,15 @@ module.exports = {
 
 function crawl(qry, serverFunc) {
     //crawled urls to prevent loops
+    var url = qry['url'];
+    if ( !url.startsWith('http://') ){
+        url = 'http://' + url;
+    }
+
     var visited = [];
-    visited.push(qry['url']);
+    visited.push(url);
     var depth = parseInt(qry['size']);
-    var rootNode = new WebLink(qry['url']);
+    var rootNode = new WebLink(url);
     var method = qry['searchMethod'].toLowerCase();
 
     if (method === 'bfs') {
@@ -112,8 +117,10 @@ function dfs(node, depth, visited, callback) {
             dfs(childNode, depth - 1, visited, callback);
         } else {
             //TODO: handle dead end
+            callback();
+            return;
         }
-    });
+    }, callback);
 }
 
 
@@ -148,8 +155,9 @@ function scrape(url, callback) {
                 }
             }
         });
-        callback(links)
+        callback(links);
     }).catch((err) => {
+        callback(links);
         console.log(err);
     });
 
