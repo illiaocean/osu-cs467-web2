@@ -5,7 +5,7 @@
     initFormListener();
 
     function initWebSocket() {
-        ws = new WebSocket("https://cs467-web2.herokuapp.com");
+        ws = new WebSocket("ws://localhost:12345");
         ws.onmessage = function (msg) {
             console.log("Received a message from server", msg.data);
             var message = JSON.parse(msg.data);
