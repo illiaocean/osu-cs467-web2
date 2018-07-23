@@ -5,8 +5,10 @@
     initFormListener();
 
     function initWebSocket() {
+        var protocol = window.location.protocol === 'https:' ?  'wss' : 'ws';
         var host = window.location.host;
-        ws = new WebSocket("ws://" + host);
+        var URL = protocol + "://" + host;
+        ws = new WebSocket(URL);
         ws.onmessage = function (msg) {
             console.log("Received a message from server", msg.data);
             var message = JSON.parse(msg.data);
