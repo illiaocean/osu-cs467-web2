@@ -5,7 +5,8 @@
     initFormListener();
 
     function initWebSocket() {
-        ws = new WebSocket("ws://localhost:12345");
+        var host = window.location.host;
+        ws = new WebSocket("ws://" + host);
         ws.onmessage = function (msg) {
             console.log("Received a message from server", msg.data);
             var message = JSON.parse(msg.data);
@@ -13,13 +14,16 @@
             switch (message.code) {
                 case 'searching':
                     showProgress();
+                    break;
                 case 'progressUpdated':
                     onProgressUpdate(message.data);
+                    break;
                 case '404':
                     handle404();
+                    break;
                 case 'results':
                     showResults(message.data);
-
+                    break;
             }
         };
         ws.onopen = function () {
@@ -70,6 +74,7 @@
     }
 
     function showResults(graph) {
+        $form.hide();
         $progress.hide();
         $results.show();
         buildGraph(graph);
@@ -77,6 +82,7 @@
 
     function buildGraph(graph) {
         var links = getUniqueLinks(graph);
+        var nodes = getGraphNodes(links, graph);
         var edges = getGraphEdges(links, graph);
         var container = document.getElementById('graph');
         var data = {
@@ -88,26 +94,60 @@
     }
 
     function getUniqueLinks(node) {
-        var links = {};
-        //todo: traverse graph
-        var nodes = new vis.DataSet([
-            {id: 1, label: 'Node 1'},
-            {id: 2, label: 'Node 2'},
-            {id: 3, label: 'Node 3'},
-            {id: 4, label: 'Node 4'},
-            {id: 5, label: 'Node 5'}
-        ]);
-
-        return nodes;
+        var links = {
+            _count: 1
+        };
+        traverse(links, node);
+        delete links._count;
+        return links;
     }
 
-    function getGraphEdges(links, graph) {
-        //todo: use links object to create a dataset of edges
-        return new vis.DataSet([
-            {from: 1, to: 3},
-            {from: 1, to: 2},
-            {from: 2, to: 4},
-            {from: 2, to: 5}
-        ]);
+    function traverse(links, node) {
+        if (links[node.url]) {
+            return;
+        }
+
+        links[node.url] = links._count++;
+
+        if (node.webLinks) {
+            node.webLinks.forEach(function (child) {
+                traverse(links, child);
+            });
+        }
+    }
+
+    function getGraphNodes(links) {
+        var linksArray = [];
+
+        for (var url in links) {
+            if (links.hasOwnProperty(url)) {
+                linksArray.push({
+                    id: links[url],
+                    label: url
+                });
+            }
+        }
+
+        return new vis.DataSet(linksArray);
+    }
+
+    function getGraphEdges(links, node) {
+        var edges = [];
+        addEdges(edges, links, node);
+        return new vis.DataSet(edges);
+    }
+
+    function addEdges(edges, links, node) {
+        if (!node.webLinks) {
+            return;
+        }
+
+        node.webLinks.forEach(function (child) {
+            edges.push({
+                from: links[node.url],
+                to: links[child.url]
+            });
+            addEdges(edges, links, child);
+        });
     }
 })();
