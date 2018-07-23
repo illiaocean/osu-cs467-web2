@@ -4,32 +4,9 @@ const scraper = require('./scraper.js');
 require('express-ws')(app);
 
 
-//placeholder query:
-qry = {
-    url: 'https://en.wikipedia.org/wiki/Special:Random',
-    searchMethod: "dfs",
-    stopKeyword: "Oregon",
-    size: "7"
-};
+let port = process.env.PORT || 3000;
+app.set('port', port);
 
-
-scraper.crawl(qry, function (node) {
-    //this function will be executed on the node tree result of the dfs/bfs
-    
-    //each node is structured:
-    //node.url is the url of the node
-    //node.webLinks is an array of child nodes
-
-    console.log(JSON.stringify(node));
-
-    //example: this will print dfs results in order
-    while(node){
-        console.log(node.url);
-        node = node.webLinks[0];
-    }
-});
-
-app.set('port', process.argv[2]);
 app.use(express.static(__dirname + '/public'));
 
 //client-server communication via websockets
@@ -47,6 +24,8 @@ app.ws('/', function (ws) {
 
             //begin search
             scraper.crawl(msg.data, function (node) {
+                console.log("Sending back graph", JSON.stringify(node));
+
                 //Search has finished. Send results back to the client.
                 var response = {
                     code: "results",
