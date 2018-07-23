@@ -26,7 +26,7 @@ module.exports = {
 function crawl(qry, serverFunc) {
     //crawled urls to prevent loops
     var url = qry['url'];
-    if ( !url.startsWith('http://') ){
+    if ( !url.startsWith('http') ){
         url = 'http://' + url;
     }
 
@@ -157,6 +157,7 @@ function scrape(url, callback) {
         });
         callback(links);
     }).catch((err) => {
+        //indicate error in link
         callback(links);
         console.log(err);
     });
