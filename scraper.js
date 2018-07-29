@@ -58,39 +58,50 @@ function crawl(qry, serverFunc){
 
 
 
-function bfs(root, depth, callback){
+function bfs(root, depth, callback) {
+    
+    var searchQueue = new Queue();
+    var foundQueue = new Queue();
+    
+    var visited = [];
 
-	var queue = new Queue();
-	var visited = [];
+    queue.enqueue(root);
+    var numFound = 1;
 
-	queue.enqueue(root);
-	var nodesInLayer = 1;
+    while (depth > 0 ) {
 
-	while( depth > 0 && !queue.isEmpty() ) {
+        if ( searchQueue.isEmpty() ){
+            if ( foundQueue.isEmpty() ){        //NOTE: foundQueue might be empty
+                break;
+            }
+            else {
+                --depth;
+                console.log("depth:" + depth);
+                //transfer found to searchQueue
+                searchQueue.a = foundQueue.a;
+                searchQueue.b = foundQueue.b;
+            }
+        }
 
-		--nodesInLayer;
+        var node = queue.dequeue();
+        visited[node.url] = true;
 
-		if(nodesInLayer <= 0){
-			--depth;
-			console.log("depth:" + depth);
-			nodesInLayer = queue.getLength();
-		}
+        scrape( node.url, function (links) {
 
-		var node = queue.dequeue();
-		visited.push(node.url);
+            for (link in links) {
+                if (  !visited[link] ) {
 
-		scrape(node.url, function(links){
+                    if( depth != 0){
+                        
+                    }
 
-			for (link in links){
-				if( !(link in visited) ){
-					var childNode = new WebLink(link)
-
-					queue.enqueue(childNode);
-					node.webLinks.push( childNode );
-				}
-			}
-		});
-	}
+                    var childNode = new WebLink(link);
+                    queue.enqueue(childNode);
+                    node.webLinks.push(childNode);
+                }
+            }
+        });
+    }
 	callback();
 }
 
@@ -118,12 +129,24 @@ function dfs(node, depth, visited, callback){
 			index = Math.floor( Math.random() * links.length )
 		}
 
+<<<<<<< Updated upstream
 		if( links.length > 0 ){ 
 			
 			visited.push( links[index] );
 
 			const childNode = new WebLink( links[index] ) 
 			node.webLinks.push( childNode );
+=======
+            dfs(childNode, depth - 1, visited, callback);
+
+        } else {
+            //TODO: handle dead end
+            callback();
+            return;
+        }
+    }, callback);
+}
+>>>>>>> Stashed changes
 
 			dfs(childNode, depth-1, visited, callback);
 		}
@@ -179,5 +202,31 @@ function scrape(url, callback){
 }
 
 
+<<<<<<< Updated upstream
 //Queue implimentation without using shift() from http://code.iamkate.com/javascript/queues/
 function Queue(){var a=[],b=0;this.getLength=function(){return a.length-b};this.isEmpty=function(){return 0==a.length};this.enqueue=function(b){a.push(b)};this.dequeue=function(){if(0!=a.length){var c=a[b];2*++b>=a.length&&(a=a.slice(b),b=0);return c}};this.peek=function(){return 0<a.length?a[b]:void 0}};
+=======
+//Queue implementation from http://code.iamkate.com/javascript/queues/
+function Queue() {
+    var a = [], b = 0;
+    this.getLength = function () {
+        return a.length - b
+    };
+    this.isEmpty = function () {
+        return 0 == a.length
+    };
+    this.enqueue = function (b) {
+        a.push(b)
+    };
+    this.dequeue = function () {
+        if (0 != a.length) {
+            var c = a[b];
+            2 * ++b >= a.length && (a = a.slice(b), b = 0);
+            return c
+        }
+    };
+    this.peek = function () {
+        return 0 < a.length ? a[b] : void 0
+    }
+};
+>>>>>>> Stashed changes
