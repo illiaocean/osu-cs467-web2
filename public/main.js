@@ -125,7 +125,8 @@
             if (links.hasOwnProperty(url)) {
                 linksArray.push({
                     id: links[url],
-                    label: url
+                    label: url.length > 20 ? url.substring(0, 20) + "..." : url,
+                    title: url
                 });
             }
         }
