@@ -30,7 +30,7 @@ module.exports = {
 				url: url, 
 				searchMethod: "bfs", 
 				stopKeyword: "Oregon", 
-				size: "5"
+				size: "3"
 			};
 
 		crawl(qry, serverFunc);
@@ -74,7 +74,11 @@ function crawl(qry, serverFunc){
 
 function bfs(queue, depth, visited, callback){
 
-    if( depth <= 0 ) { 
+    if( depth < visited.length ) {
+    	return;
+    }
+    else if( depth == visited.length ) { 
+    	log("\n\n\n ================ server callback ==============\n\n\n");
         callback();
         return; 
     }
@@ -87,7 +91,7 @@ function bfs(queue, depth, visited, callback){
         log(node.url); 
         log("links: " + links.length + " depth: " + depth);
 
-        if(links.length > 0) {
+        if(links.length > 0 ) {
             links.forEach(function(link){
 
                 if( !(link in visited) ){
@@ -99,13 +103,14 @@ function bfs(queue, depth, visited, callback){
 
                     queue.enqueue(childNode);
 
-                    bfs(queue, depth-1, visited, callback);
+                    bfs(queue, depth, visited, callback);
                 }
             });
 
         } else {
             //TODO: handle dead end
-            callback();
+            // callback();
+            console.log("No links for " + node.url)
             return;
         }
     });
