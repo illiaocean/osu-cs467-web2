@@ -116,16 +116,6 @@ function bfs(queue, depth, visited, callback){
 }
 
 
-                    queue.enqueue(childNode);
-                    node.webLinks.push(childNode);
-                }
-            }
-        });
-    }
-
-    callback();
-}
-
 
 
 function dfs(node, depth, visited, callback) {

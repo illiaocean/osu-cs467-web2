@@ -11,6 +11,7 @@ app.set('port', port);
 //pass in callback function to handle links
 // scraper.crawl('https://en.wikipedia.org/wiki/Special:Random', function(links){ console.log(links); });
 
+
 app.use(express.static(__dirname + '/public'));
 
 //client-server communication via websockets
