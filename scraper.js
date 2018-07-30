@@ -2,6 +2,14 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 
 
+const DEBUGGING = true;
+
+function log (argument) {
+    if(DEBUGGING){
+        console.log(argument);
+    }
+}
+
 //constructor for WebLink object
 function WebLink(url) {
     this.url = url;
@@ -11,71 +19,102 @@ function WebLink(url) {
 //scraper API
 module.exports = {
 
-    scrape: function (url, callback) {
-        console.log("scraping: " + url);
-        scrape(url, callback);
-    },
-    crawl: function (qry, serverFunc) {
+	scrape: function(url, callback){
+		log("scraping: " + url);
+		scrape(url, callback);
+	},
+	crawl: function(url, serverFunc){
+		//placeholder:
+		qry = {	
+				url: url, 
+				searchMethod: "bfs", 
+				stopKeyword: "Oregon", 
+				size: "3"
+			};
 
-        crawl(qry, serverFunc);
-    }
-
+		crawl(qry, serverFunc);
+	}
 };
 
+//TODO: impliment BFS, DFS
+function crawl(qry, serverFunc){
 
-function crawl(qry, serverFunc) {
-    //crawled urls to prevent loops
-    var url = qry['url'];
-    if ( !url.startsWith('http') ){
-        url = 'http://' + url;
-    }
+	//crawled urls to prevent loops
+	var visited = [];
+	visited.push( qry['url'] );
 
-    var visited = [];
-    visited.push(url);
-    var depth = parseInt(qry['size']);
-    var rootNode = new WebLink(url);
-    var method = qry['searchMethod'].toLowerCase();
+	var depth = parseInt( qry['size'] );
 
-    if (method === 'bfs') {
-        bfs(rootNode, depth, function () {
-            serverFunc(rootNode);
-        });
-    } else if (method === 'dfs') {
-        dfs(rootNode, depth, visited, function () {
-            serverFunc(rootNode);
-        });
-    } else {
-        console.log("scraper.js: Could not parse search method.")
-        serverFunc(null);
-    }
+	var rootNode = new WebLink( qry['url']  )
+
+	if ( qry['searchMethod'].toLowerCase() == 'bfs'){    
+
+        var visited = [];
+
+        var queue = new Queue();
+
+        queue.enqueue( rootNode );
+		
+        bfs(queue, depth, visited, function(){
+			serverFunc(rootNode);
+		});
+	}
+	else if ( qry['searchMethod'].toLowerCase() == 'dfs' ) {
+		dfs(rootNode, depth, visited, function(){
+			serverFunc(rootNode);
+		});
+	}
+	else {
+		log("scraper.js: Could not parse search method.")
+		serverFunc(null);
+	}
 }
 
 
-function bfs(root, depth, callback) {
-    var queue = new Queue();
-    var visited = [];
+function bfs(queue, depth, visited, callback){
 
-    queue.enqueue(root);
-    var nodesInLayer = 1;
+    if( depth < visited.length ) {
+    	return;
+    }
+    else if( depth == visited.length ) { 
+    	log("\n\n\n ================ server callback ==============\n\n\n");
+        callback();
+        return; 
+    }
+    
+    var node = queue.dequeue();
 
-    while (depth > 0 && !queue.isEmpty()) {
+    //pass dfs/bfs function to scraper to perform crawl
+    scrape(node.url, function( links ){
 
-        --nodesInLayer;
+        log(node.url); 
+        log("links: " + links.length + " depth: " + depth);
 
-        if (nodesInLayer <= 0) {
-            --depth;
-            console.log("depth:" + depth);
-            nodesInLayer = queue.getLength();
+        if(links.length > 0 ) {
+            links.forEach(function(link){
+
+                if( !(link in visited) ){
+
+                    visited.push( link );
+
+                    const childNode = new WebLink( link ) 
+                    node.webLinks.push( childNode );
+
+                    queue.enqueue(childNode);
+
+                    bfs(queue, depth, visited, callback);
+                }
+            });
+
+        } else {
+            //TODO: handle dead end
+            // callback();
+            console.log("No links for " + node.url)
+            return;
         }
+    });
+}
 
-        var node = queue.dequeue();
-        visited.push(node.url);
-
-        scrape(node.url, function (links) {
-
-            for (link in links) {
-                if (!(link in visited)) {
-                    var childNode = new WebLink(link);
 
                     queue.enqueue(childNode);
                     node.webLinks.push(childNode);
@@ -86,6 +125,7 @@ function bfs(root, depth, callback) {
 
     callback();
 }
+
 
 
 function dfs(node, depth, visited, callback) {
@@ -102,6 +142,7 @@ function dfs(node, depth, visited, callback) {
         //in dfs, randomly choose link
         var index = Math.floor(Math.random() * links.length);
 
+
         //make sure not visited
         while (links.length > 0 && links[index] in visited) {
             links.splice(index, 1);
@@ -111,16 +152,18 @@ function dfs(node, depth, visited, callback) {
         if (links.length > 0) {
             visited.push(links[index]);
 
+
             const childNode = new WebLink(links[index])
             node.webLinks.push(childNode);
 
             dfs(childNode, depth - 1, visited, callback);
+
         } else {
             //TODO: handle dead end
             callback();
             return;
         }
-    }, callback);
+    });
 }
 
 
@@ -162,11 +205,12 @@ function scrape(url, callback) {
         console.log(err);
     });
 
-    return links;
+    return links;   //TODO: does this need return?
 }
 
 
-//Queue implementation without using shift() from http://code.iamkate.com/javascript/queues/
+
+//Queue implementation from http://code.iamkate.com/javascript/queues/
 function Queue() {
     var a = [], b = 0;
     this.getLength = function () {
@@ -184,6 +228,8 @@ function Queue() {
             2 * ++b >= a.length && (a = a.slice(b), b = 0);
             return c
         }
+        return null;
+
     };
     this.peek = function () {
         return 0 < a.length ? a[b] : void 0

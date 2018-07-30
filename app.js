@@ -4,8 +4,12 @@ const scraper = require('./scraper.js');
 require('express-ws')(app);
 
 
+
 let port = process.env.PORT || 3000;
 app.set('port', port);
+
+//pass in callback function to handle links
+// scraper.crawl('https://en.wikipedia.org/wiki/Special:Random', function(links){ console.log(links); });
 
 app.use(express.static(__dirname + '/public'));
 
