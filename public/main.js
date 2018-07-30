@@ -76,10 +76,15 @@
     }
 
     function showResults(graph) {
-        $form.hide();
         $progress.hide();
         $results.show();
         buildGraph(graph);
+        $results.find('#run-another').on('submit', function (event) {
+            event.preventDefault();
+            $results.hide();
+            $form[0].reset();
+            $searchSection.show();
+        });
     }
 
     function buildGraph(graph) {
@@ -94,7 +99,7 @@
         var options = {
             // configure: {
             //     enabled: true,
-            //     filter: 'physics, layout',
+            //     filter: 'physics',
             //     showButton: true
             // }
         };
@@ -102,8 +107,13 @@
 
         //Open website in a new tab on node click
         network.on( 'click', function(properties) {
-            var id = properties.nodes;
-            var node = nodes.get(id)[0];
+            var ids = properties.nodes;
+
+            if (!ids.length) {
+                return;
+            }
+
+            var node = nodes.get(ids)[0];
             var newWindow = window.open(node.title, '_blank');
             newWindow.focus();
         });

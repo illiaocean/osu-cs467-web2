@@ -24,3 +24,8 @@ body {
   height: 80vh;
   border: 1px solid grey;
 }
+
+#run-another {
+  text-align: center;
+  padding-top: 20px;
+}
