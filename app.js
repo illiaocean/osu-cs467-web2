@@ -1,4 +1,4 @@
-const DEBUGGING = true;
+const DEBUGGING = false;
 
 const express = require('express');
 const app = express();

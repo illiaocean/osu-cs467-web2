@@ -23,16 +23,9 @@ module.exports = {
 		log("scraping: " + url);
 		scrape(url, callback);
 	},
-	crawl: function(url, serverFunc){
-		//placeholder:
-		qry = {	
-				url: url, 
-				searchMethod: "bfs", 
-				stopKeyword: "Oregon", 
-				size: "3"
-			};
+	crawl: function(qry, serverFunc){
 
-		crawl(qry, serverFunc);
+		crawl(qry.data, serverFunc);
 	}
 };
 
@@ -159,43 +152,47 @@ function dfs(node, depth, visited, callback) {
 
 //webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
 //scrapes url site and performs callback on each link
-function scrape(url, callback) {
+function scrape(url, callback){
+    
+    log("scraping " + url);
 
     //options for request
-    const options = {
-        uri: url,
-        transform: function (body) {
-            return cheerio.load(body);
-        }
+    const options = {       
+      uri: url,
+      transform: function (body) {
+        return cheerio.load(body);
+      }
     };
-
+    
     var links = [];
     var link = '';
 
     //calls request, executes promise
-    rp(options).then(($) => {
-        //TODO: implement keyword stop
-        $('a').each(function () {
-            if (link = $(this).attr('href')) {
+    rp(options)
+      .then(($) => {
+//TODO: impliment keyword stop
+
+        $('a').each( function(){
+            
+            if ( link = $(this).attr('href') ) {
+
                 //if link address is self-referenced, insert domain
-                if (link.substring(0, 2) == './') {
+                if( link.substring(0,2) == './' ){
                     link = url + link.substring(1);
                 }
-
                 //add unique link
-                if (link.startsWith('http') && !links.includes(link)) {
+                if( link.startsWith('http') && !links.includes(link)){
                     links.push(link);
                 }
             }
         });
-        callback(links);
-    }).catch((err) => {
-        //indicate error in link
-        callback(links);
-        console.log(err);
-    });
+        callback(links)
+      })
+      .catch((err) => {
+        log(err);
+      });
 
-    return links;   //TODO: does this need return?
+    return links;
 }
 
 
