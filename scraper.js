@@ -1,8 +1,8 @@
+const DEBUGGING = true;
+
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 
-
-const DEBUGGING = true;
 
 function log (argument) {
     if(DEBUGGING){
@@ -24,8 +24,7 @@ module.exports = {
 		scrape(url, callback);
 	},
 	crawl: function(qry, serverFunc){
-
-		crawl(qry.data, serverFunc);
+		crawl(qry, serverFunc);
 	}
 };
 

@@ -6,13 +6,18 @@ const scraper = require('./scraper.js');
 require('express-ws')(app);
 
 
-
 let port = process.env.PORT || 3000;
 app.set('port', port);
 
 //pass in callback function to handle links
-if(DEBUGGING){
-    scraper.crawl('https://en.wikipedia.org/wiki/Special:Random', function(links){ console.log(links); });
+if(DEBUGGING){      
+    qry = {  
+             url: 'https://en.wikipedia.org/wiki/Special:Random', 
+             searchMethod: "bfs", 
+             stopKeyword: "Oregon", 
+             size: "3"
+         };
+    scraper.crawl(qry, function(links){ console.log(links); });
 }
 
 
