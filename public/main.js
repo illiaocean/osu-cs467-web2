@@ -71,8 +71,8 @@
 
     }
 
-    function onProgressUpdate() {
-
+    function onProgressUpdate(data) {
+        $progress.find('.text')[0].innerText = `Websites discovered: ${data.count}`;
     }
 
     function showResults(graph) {

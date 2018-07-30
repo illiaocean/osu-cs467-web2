@@ -23,13 +23,13 @@ module.exports = {
 		log("scraping: " + url);
 		scrape(url, callback);
 	},
-	crawl: function(qry, serverFunc){
-		crawl(qry, serverFunc);
+	crawl: function(qry, serverFunc, websocket){
+		crawl(qry, serverFunc, websocket);
 	}
 };
 
 //TODO: impliment BFS, DFS
-function crawl(qry, serverFunc){
+function crawl(qry, serverFunc, websocket){
 
     if( !qry['url'].startsWith('http') ){
         qry['url'] = "http://" + qry['url'];
@@ -53,12 +53,12 @@ function crawl(qry, serverFunc){
 		
         bfs(queue, depth, visited, function(){
 			serverFunc(rootNode);
-		});
+		}, websocket, 1);
 	}
 	else if ( qry['searchMethod'].toLowerCase() == 'dfs' ) {
 		dfs(rootNode, depth, visited, function(){
 			serverFunc(rootNode);
-		});
+		}, websocket, 1);
 	}
 	else {
 		log("scraper.js: Could not parse search method.")
@@ -67,7 +67,7 @@ function crawl(qry, serverFunc){
 }
 
 
-function bfs(queue, depth, visited, callback){
+function bfs(queue, depth, visited, callback, websocket, count){
 
     if( depth < visited.length ) {
     	return;
@@ -90,6 +90,14 @@ function bfs(queue, depth, visited, callback){
             links.forEach(function(link){
 
                 if( !(link in visited) ){
+                    var notification = {
+                        code: 'progressUpdated',
+                        data: {
+                            // url: link,
+                            count: count++
+                        }
+                    };
+                    websocket.send(JSON.stringify(notification));
 
                     visited.push( link );
 
@@ -98,7 +106,7 @@ function bfs(queue, depth, visited, callback){
 
                     queue.enqueue(childNode);
 
-                    bfs(queue, depth, visited, callback);
+                    bfs(queue, depth, visited, callback, websocket, count);
                 }
             });
 
@@ -114,7 +122,7 @@ function bfs(queue, depth, visited, callback){
 
 
 
-function dfs(node, depth, visited, callback) {
+function dfs(node, depth, visited, callback, websocket, count) {
     if (depth <= 0) {
         callback();
         return;
@@ -137,12 +145,19 @@ function dfs(node, depth, visited, callback) {
 
         if (links.length > 0) {
             visited.push(links[index]);
-
+            var notification = {
+                code: 'progressUpdated',
+                data: {
+                    // url: links[index],
+                    count: count++
+                }
+            };
+            websocket.send(JSON.stringify(notification));
 
             const childNode = new WebLink(links[index])
             node.webLinks.push(childNode);
 
-            dfs(childNode, depth - 1, visited, callback);
+            dfs(childNode, depth - 1, visited, callback, websocket, count);
 
         } else {
             //TODO: handle dead end

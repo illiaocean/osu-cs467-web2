@@ -46,7 +46,7 @@ app.ws('/', function (ws) {
                     data: node
                 };
                 ws.send(JSON.stringify(response));
-            });
+            }, ws);
         }
     });
 });
