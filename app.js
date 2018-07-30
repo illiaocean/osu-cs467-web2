@@ -1,3 +1,5 @@
+const DEBUGGING = true;
+
 const express = require('express');
 const app = express();
 const scraper = require('./scraper.js');
@@ -9,7 +11,9 @@ let port = process.env.PORT || 3000;
 app.set('port', port);
 
 //pass in callback function to handle links
-// scraper.crawl('https://en.wikipedia.org/wiki/Special:Random', function(links){ console.log(links); });
+if(DEBUGGING){
+    scraper.crawl('https://en.wikipedia.org/wiki/Special:Random', function(links){ console.log(links); });
+}
 
 
 app.use(express.static(__dirname + '/public'));
