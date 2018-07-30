@@ -6,7 +6,7 @@ const scraper = require('./scraper.js');
 require('express-ws')(app);
 
 
-let port = process.env.PORT || 3000;
+let port = process.env.PORT || process.argv[2] || 3000;
 app.set('port', port);
 
 //pass in callback function to handle links

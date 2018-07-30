@@ -31,6 +31,10 @@ module.exports = {
 //TODO: impliment BFS, DFS
 function crawl(qry, serverFunc){
 
+    if( !qry['url'].startsWith('http') ){
+        qry['url'] = "http://" + qry['url'];
+    }
+
 	//crawled urls to prevent loops
 	var visited = [];
 	visited.push( qry['url'] );
