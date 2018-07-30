@@ -74,6 +74,10 @@ function bfs(queue, depth, visited, callback){
     }
     else if( depth == visited.length ) { 
     	log("\n\n\n ================ server callback ==============\n\n\n");
+        //empty queue
+        while(!queue.isEmpty){
+            queue.dequeue();
+        }
         callback();
         return; 
     }
