@@ -91,8 +91,22 @@
             nodes: nodes,
             edges: edges
         };
-        var options = {};
-        new vis.Network(container, data, options);
+        var options = {
+            // configure: {
+            //     enabled: true,
+            //     filter: 'physics, layout',
+            //     showButton: true
+            // }
+        };
+        var network = new vis.Network(container, data, options);
+
+        //Open website in a new tab on node click
+        network.on( 'click', function(properties) {
+            var id = properties.nodes;
+            var node = nodes.get(id)[0];
+            var newWindow = window.open(node.title, '_blank');
+            newWindow.focus();
+        });
     }
 
     function getUniqueLinks(node) {
