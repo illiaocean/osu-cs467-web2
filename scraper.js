@@ -35,204 +35,107 @@ function crawl(qry, serverFunc, websocket){
         qry['url'] = "http://" + qry['url'];
     }
 
-	//crawled urls to prevent loops
-	var visited = [];
-	visited.push( qry['url'] );
 
-	var depth = parseInt( qry['size'] );
+    var searchMethod = qry['searchMethod'].toLowerCase() == 'bfs' ? 'bfs' : 'dfs'
 
-	var rootNode = new WebLink( qry['url']  );
+    var crawlObj = {
+    	visited: [ qry['url'] ],
+    	depth : parseInt( qry['size'] ),
+        method : searchMethod,
+        queue : new Queue()   
+    }
 
-    var visited = [];
+    var rootNode = new WebLink( qry['url']  );
 
-    var queue = new Queue();
+    crawlObj.queue.enqueue( rootNode );
 
-    queue.enqueue( rootNode );
+    crawlHelper( crawlObj, function(){	serverFunc(rootNode); }, websocket);
 
-	if ( qry['searchMethod'].toLowerCase() == 'bfs'){    
-        crawlHelper('bfs', queue, depth, visited, function(){
-			serverFunc(rootNode);
-		}, websocket);
-	}
-	else if ( qry['searchMethod'].toLowerCase() == 'dfs' ) {
-        crawlHelper('dfs', queue, depth, visited, function(){
-            serverFunc(rootNode);
-        }, websocket);
-	}
-	else {
-		log("scraper.js: Could not parse search method.")
-		serverFunc(null);
-	}
 }
 
 
+//performs bfs or dfs crawl
+function crawlHelper(crawlObj, callback, websocket ){
 
-function crawlHelper(method, queue, depth, visited, callback, websocket ){
-    if( depth == visited.length ) { 
+    if( crawlObj.depth == crawlObj.visited.length ) { 
         log("\n\n\n ==========  server callback  ==========\n\n\n");
 
-        while(!queue.isEmpty){  //eliminate further calls
-            queue.dequeue();
+        while( !crawlObj.queue.isEmpty ){  //eliminate further calls
+            crawlObj.queue.dequeue();
         }
 
         callback();
         return; 
     }
-    else if( depth < visited.length ) {    //prevents inf recursion
+    else if( crawlObj.depth < crawlObj.visited.length ) {    //prevents inf recursion
         return;
     }
     
     //get node depending on search method
-    var node = method == 'bfs' ? queue.dequeue() : queue.pop_back();
+    var node = crawlObj.queue.dequeue();
 
     //scrape node url for links
     scrape(node.url, function( links ){
 
         log(node.url); 
-        log("links: " + links.length + " depth: " + depth);
+        log("links: " + links.length + " depth: " + crawlObj.depth);
 
         if(links.length > 0 ) {
-            links.forEach(function(link){
 
-                if( !(link in visited) ){
+            var index = 0;
 
-                    visited.push( link );
+            //random index for dfs
+            if( crawlObj.method == 'dfs'){
+                index = Math.floor(Math.random() * links.length);
+                //make sure not visited
+                while (links.length > 0 && links[index] in crawlObj.visited) {
+                    links.splice(index, 1);
+                    index = Math.floor(Math.random() * links.length)
+                }
+            }   
 
-                    //send update to client
-                    websocket.send( JSON.stringify({
-                        code: 'progressUpdated',
-                        data: {
-                            // url: link,
-                            count: visited.length
-                        })
-                    );
+            //loops through links if bfs, else only once on index
+            do {
+                var link = links[index];
+
+                if( !( link in crawlObj.visited) ){
+
+                    crawlObj.visited.push( link );
+
+                    if(websocket){
+                        //send update to client
+                        websocket.send( JSON.stringify({
+                            code: 'progressUpdated',
+                            data: {
+                                // url: link,
+                                count: crawlObj.visited.length
+                            }
+                        }));
+                    }
 
                     //append node with child link node
                     const childNode = new WebLink( link ) 
                     node.webLinks.push( childNode );
 
-                    queue.enqueue(childNode);
+                    crawlObj.queue.enqueue(childNode);
 
-                    crawlHelper(method, queue, depth, visited, callback, websocket);
+                    crawlHelper(crawlObj, callback, websocket);
                 }
-            });
+                ++index;
+            } while ( crawlObj.method != 'dfs' && index < links.length );
 
-        } else {
-            //TODO: handle dead end
-            // callback();
+        } 
+        else if ( crawlObj.method == 'dfs' ){
+            //handle dead end 
+            //if visited < depth, get next link and search in tree for node, then search
             console.log("No links for " + node.url)
-            return;
-        }
-    });
-
-
-}
-
-/*
-function bfs(queue, depth, visited, callback, websocket, count){
-
-    if( depth < visited.length ) {
-        return;
-    }
-    else if( depth == visited.length ) { 
-    	log("\n\n\n ================ server callback ==============\n\n\n");
-        //empty queue
-        while(!queue.isEmpty){
-            queue.dequeue();
-        }
-        callback();
-        return; 
-    }
-    
-    var node = queue.dequeue();
-
-    //pass dfs/bfs function to scraper to perform crawl
-    scrape(node.url, function( links ){
-
-        log(node.url); 
-        log("links: " + links.length + " depth: " + depth);
-
-        if(links.length > 0 ) {
-            links.forEach(function(link){
-
-                if( !(link in visited) ){
-                    var notification = {
-                        code: 'progressUpdated',
-                        data: {
-                            // url: link,
-                            count: count++
-                        }
-                    };
-                    websocket.send(JSON.stringify(notification));
-
-                    visited.push( link );
-
-                    const childNode = new WebLink( link ) 
-                    node.webLinks.push( childNode );
-
-                    queue.enqueue(childNode);
-
-                    bfs(queue, depth, visited, callback, websocket, count);
-                }
-            });
-
-        } else {
-            //TODO: handle dead end
-            // callback();
-            console.log("No links for " + node.url)
-            return;
-        }
-    });
-}
-
-
-
-
-function dfs(node, depth, visited, callback, websocket, count) {
-    if (depth <= 0) {
-        callback();
-        return;
-    }
-
-    //pass dfs/bfs function to scraper to perform crawl
-    scrape(node.url, function (links) {
-        console.log(node.url);
-        console.log("links: " + links.length + " depth: " + depth);
-
-        //in dfs, randomly choose link
-        var index = Math.floor(Math.random() * links.length);
-
-
-        //make sure not visited
-        while (links.length > 0 && links[index] in visited) {
-            links.splice(index, 1);
-            index = Math.floor(Math.random() * links.length)
-        }
-
-        if (links.length > 0) {
-            visited.push(links[index]);
-            var notification = {
-                code: 'progressUpdated',
-                data: {
-                    // url: links[index],
-                    count: count++
-                }
-            };
-            websocket.send(JSON.stringify(notification));
-
-            const childNode = new WebLink(links[index])
-            node.webLinks.push(childNode);
-
-            dfs(childNode, depth - 1, visited, callback, websocket, count);
-
-        } else {
-            //TODO: handle dead end
+            
             callback();
             return;
         }
     });
 }
-*/
+
 
 //webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
 //scrapes url site and performs callback on each link
