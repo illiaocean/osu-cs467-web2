@@ -46,24 +46,24 @@ function crawl(qry, serverFunc){
 
 	var depth = parseInt( qry['size'] );
 
-	var rootNode = new WebLink( qry['url']  )
+	var rootNode = new WebLink( qry['url']  );
+
+    var visited = [];
+
+    var queue = new Queue();
+
+    queue.enqueue( rootNode );
 
 	if ( qry['searchMethod'].toLowerCase() == 'bfs'){    
-
-        var visited = [];
-
-        var queue = new Queue();
-
-        queue.enqueue( rootNode );
-		
-        bfs(queue, depth, visited, function(){
+        crawlHelper('bfs', queue, depth, visited, function(){
 			serverFunc(rootNode);
-		});
+		}, websocket);
 	}
 	else if ( qry['searchMethod'].toLowerCase() == 'dfs' ) {
-		dfs(rootNode, depth, visited, function(){
-			serverFunc(rootNode);
-		});
+        crawlHelper('dfs', queue, depth, visited, function(){
+            serverFunc(rootNode);
+        }, websocket);
+
 	}
 	else {
 		log("scraper.js: Could not parse search method.")
@@ -72,10 +72,72 @@ function crawl(qry, serverFunc){
 }
 
 
-function bfs(queue, depth, visited, callback){
+function crawlHelper(method, queue, depth, visited, callback, websocket ){
+    if( depth == visited.length ) { 
+        log("\n\n\n ==========  server callback  ==========\n\n\n");
+
+        while(!queue.isEmpty){  //eliminate further calls
+            queue.dequeue();
+        }
+
+        callback();
+        return; 
+    }
+    else if( depth < visited.length ) {    //prevents inf recursion
+        return;
+    }
+    
+    //get node depending on search method
+    var node = method == 'bfs' ? queue.dequeue() : queue.pop_back();
+
+    //scrape node url for links
+    scrape(node.url, function( links ){
+
+        log(node.url); 
+        log("links: " + links.length + " depth: " + depth);
+
+        if(links.length > 0 ) {
+            links.forEach(function(link){
+
+                if( !(link in visited) ){
+
+                    visited.push( link );
+
+                    //send update to client
+                    websocket.send( JSON.stringify({
+                        code: 'progressUpdated',
+                        data: {
+                            // url: link,
+                            count: visited.length
+                        })
+                    );
+
+                    //append node with child link node
+                    const childNode = new WebLink( link ) 
+                    node.webLinks.push( childNode );
+
+                    queue.enqueue(childNode);
+
+                    crawlHelper(method, queue, depth, visited, callback, websocket);
+                }
+            });
+
+        } else {
+            //TODO: handle dead end
+            // callback();
+            console.log("No links for " + node.url)
+            return;
+        }
+    });
+
+
+}
+
+/*
+function bfs(queue, depth, visited, callback, websocket, count){
 
     if( depth < visited.length ) {
-    	return;
+        return;
     }
     else if( depth == visited.length ) { 
     	log("\n\n\n ================ server callback ==============\n\n\n");
@@ -156,7 +218,7 @@ function dfs(node, depth, visited, callback){
         }
     });
 }
-
+*/
 
 
 //webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
@@ -217,6 +279,9 @@ function Queue() {
     this.enqueue = function (b) {
         a.push(b)
     };
+    this.pop_back = function(){
+        return a.pop();
+    }
     this.dequeue = function () {
         if (0 != a.length) {
             var c = a[b];
