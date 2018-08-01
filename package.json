@@ -4,7 +4,8 @@
   "description": "Graphical WEB Crawler",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -21,8 +22,9 @@
     "express": "^4.16.2",
     "express-ws": "^4.0.0",
     "forever": "^0.15.3",
+    "puppeteer": "^1.6.2",
     "request-promise": "^4.2.2",
-    "websocket": "^1.0.26"
+    "webshot2": "^2.0.1"
   },
   "dependencies": {
     "index.js": "0.0.3",
