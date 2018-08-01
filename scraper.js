@@ -135,7 +135,7 @@ function crawlHelper(crawlObj, callback, websocket ){
 
         } 
         else if ( crawlObj.method == 'dfs' ){
-            //handle dead end 
+            //TODO: handle dead end 
             //if visited < depth, get next link and search in tree for node, then search
             console.log("No links for " + node.url)
             
