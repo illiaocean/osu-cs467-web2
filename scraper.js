@@ -16,6 +16,7 @@ function WebLink(url) {
     this.webLinks = [];
 }
 
+
 //scraper API
 module.exports = {
 
@@ -28,7 +29,9 @@ module.exports = {
 	}
 };
 
-//TODO: impliment BFS, DFS
+
+
+
 function crawl(qry, serverFunc, websocket){
 
     if( !qry['url'].startsWith('http') ){
@@ -36,20 +39,26 @@ function crawl(qry, serverFunc, websocket){
     }
 
 
-    var searchMethod = qry['searchMethod'].toLowerCase() == 'bfs' ? 'bfs' : 'dfs'
+    var searchMethod = qry['searchMethod'].toLowerCase();
 
-    var crawlObj = {
-    	visited: [ qry['url'] ],
-    	depth : parseInt( qry['size'] ),
-        method : searchMethod,
-        queue : new Queue()   
+    if( searchMethod == 'dfs' || 'bfs'){
+
+        var crawlObj = {
+        	visited: [ qry['url'] ],
+        	depth : parseInt( qry['size'] ),
+            method : searchMethod,
+            queue : new Queue()   
+        }
+
+        var rootNode = new WebLink( qry['url']  );
+
+        crawlObj.queue.enqueue( rootNode );
+
+        crawlHelper( crawlObj, function(){	serverFunc(rootNode); }, websocket);
     }
-
-    var rootNode = new WebLink( qry['url']  );
-
-    crawlObj.queue.enqueue( rootNode );
-
-    crawlHelper( crawlObj, function(){	serverFunc(rootNode); }, websocket);
+    else {
+        console.log("Invalid searchMethod:" + searchMethod);
+    }
 
 }
 
