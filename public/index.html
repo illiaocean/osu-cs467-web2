@@ -66,6 +66,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary">RUN</button>
+            <button type="button" class="btn btn-link" onclick="showHistory()">Build from history instead</button>
         </form>
     </section>
 
@@ -76,8 +77,36 @@
 
     <section id="results" style="display: none">
         <div id="graph"></div>
-        <form id="run-another">
+        <form class="run-another">
             <button type="submit" class="btn btn-primary">RUN ANOTHER</button>
+            <button type="button" class="btn btn-link" onclick="showHistory()">Build from history</button>
+        </form>
+    </section>
+
+    <section id="history" style="display: none">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Date</th>
+                <th scope="col">Start URL</th>
+                <th scope="col">Method</th>
+                <th scope="col">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <div class="build" style="display: none">
+            <h6>There is no history yet. Go ahead and build a graph first.</h6>
+            <form class="run-another">
+                <button type="submit" class="btn btn-primary">Go</button>
+            </form>
+        </div>
+
+        <form class="run-another">
+            <button type="submit" class="btn btn-link">Back to search params</button>
         </form>
     </section>
 

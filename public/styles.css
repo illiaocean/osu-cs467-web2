@@ -25,7 +25,16 @@ body {
   border: 1px solid grey;
 }
 
-#run-another {
+.run-another {
   text-align: center;
   padding-top: 20px;
+}
+
+.run-another button {
+  min-width: 100px;
+}
+
+#history table {
+  width: 90%;
+  margin: 0 auto;
 }
