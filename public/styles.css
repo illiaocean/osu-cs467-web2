@@ -14,8 +14,27 @@ body {
   width: 100%;
 }
 
+#progress img {
+  display: block;
+  margin: 30px auto;
+}
+
 #graph {
-  width: 500px;
-  height: 500px;
+  width: 80vw;
+  height: 80vh;
   border: 1px solid grey;
+}
+
+.run-another {
+  text-align: center;
+  padding-top: 20px;
+}
+
+.run-another button {
+  min-width: 100px;
+}
+
+#history table {
+  width: 90%;
+  margin: 0 auto;
 }
