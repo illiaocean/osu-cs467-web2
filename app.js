@@ -1,8 +1,10 @@
-const DEBUGGING = false;
+const DEBUGGING = true;
 
 const express = require('express');
 const app = express();
 const scraper = require('./scraper.js');
+// const screenshot = require('./screenshot.js');
+
 require('express-ws')(app);
 
 
@@ -17,7 +19,14 @@ if(DEBUGGING){
              stopKeyword: "Oregon", 
              size: "3"
          };
-    scraper.crawl(qry, function(links){ console.log(links); });
+    scraper.crawl(qry, 
+        function(links){ 
+
+            // links.forEach(function(link){
+                console.log(links);
+            // }); 
+
+        });
 }
 
 
