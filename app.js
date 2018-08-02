@@ -37,9 +37,6 @@ app.ws('/', function (ws) {
         console.log("Server received message", msg);
         msg = JSON.parse(msg);
 
-        //msg.data will contain search query parameters. Here's an example:
-        //{url: "google.com", searchMethod: "BFS", stopKeyword: "Oregon", size: "100"}
-
         if (msg.code === 'search') {
             //notify the client that request has been accepted
             ws.send(JSON.stringify({code: "searching"}));
@@ -54,13 +51,7 @@ app.ws('/', function (ws) {
                     data: node
                 };
                 ws.send(JSON.stringify(response));
-                
-                // test send image
-                var response = {
-                    code: "image",
-                    data: "http://andriuskelly.com/img/set-screenshot.png"
-                };
-                ws.send(JSON.stringify(response));
+
             });
         }
     });
@@ -73,3 +64,4 @@ app.use(require('./routes/500'));
 app.listen(app.get('port'), function () {
     console.log('Express started on port: ' + app.get('port') + '.');
 });
+

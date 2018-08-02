@@ -68,12 +68,38 @@ function crawl(qry, websocket, serverFunc){
 
 }
 
+// https://github.com/checkly/puppeteer-examples/blob/master/1.%20basics/screenshots.js
+async function capture(url, dest, ws) {
+    try {
+        const browser = await puppeteer.launch()
+        const page = await browser.newPage()
+        await page.setViewport({ width: 1280, height: 800 })
+        await page.goto(url)
+
+        var img = await page.screenshot({ encoding: 'base64', type: 'jpeg' })
+
+        await browser.close()
+
+        if(ws){
+            var response = {
+              code: "image",
+              data: img
+            };
+            await ws.send(JSON.stringify(response));
+        }
+      
+    }
+    catch (err){
+      console.log("\n Screenshot Error: " + err)
+    }
+}
+
 
 //performs bfs or dfs crawl
 function crawlHelper(crawlObj, callback, websocket ){
 
     if( crawlObj.depth == crawlObj.visited.length ) { 
-        log("\n\n\n ==========  server callback  ==========\n\n\n");
+        log("\n\n ==========  server callback  ==========\n\n");
 
         while( !crawlObj.queue.isEmpty ){  //eliminate further calls
             crawlObj.queue.dequeue();
@@ -93,7 +119,7 @@ function crawlHelper(crawlObj, callback, websocket ){
     scrape(node.url, function( links ){
 
         //get image of url
-        capture(node.url, "./temp/"+node.count + ".png"); 
+        capture(node.url, "./temp/"+node.count + ".jpeg", websocket); 
 
         //recursively search links
         if(links.length > 0 ) {
@@ -152,20 +178,6 @@ function crawlHelper(crawlObj, callback, websocket ){
     });
 }
 
-// https://github.com/checkly/puppeteer-examples/blob/master/1.%20basics/screenshots.js
-async function capture(url, dest) {
-    try {
-      const browser = await puppeteer.launch()
-      const page = await browser.newPage()
-      await page.setViewport({ width: 1280, height: 800 })
-      await page.goto(url)
-      await page.screenshot({ path: dest, fullPage: false })
-      await browser.close()
-    }
-    catch (err){
-      console.log("\n\n Screenshot Error: " + err)
-    }
-}
 
 //webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
 //scrapes url site and performs callback on each link

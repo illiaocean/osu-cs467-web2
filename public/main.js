@@ -48,17 +48,10 @@ function initWebSocket() {
 
 function receiveImage(data){
     var image = new Image();
-    image.src = data;
+    image.src = 'data:image/jpeg;base64,' + data;
+    console.log(image.src);
     document.body.appendChild(image);
 }
-
-// function testImage(ws){
-//     var request = {
-//         code: 'img',
-//         data: {}
-//     };
-//     ws.send(JSON.stringify(request));
-// }
 
 function findElements() {
     $searchSection = $('#search-form');
