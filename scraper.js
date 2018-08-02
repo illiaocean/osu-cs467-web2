@@ -73,7 +73,7 @@ async function capture(url, dest, ws) {
     try {
         const browser = await puppeteer.launch()
         const page = await browser.newPage()
-        await page.setViewport({ width: 1280, height: 800 })
+        await page.setViewport({ width: 480, height: 240 })
         await page.goto(url)
 
         var img = await page.screenshot({ encoding: 'base64', type: 'jpeg' })

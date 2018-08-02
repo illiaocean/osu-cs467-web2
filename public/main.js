@@ -49,7 +49,6 @@ function initWebSocket() {
 function receiveImage(data){
     var image = new Image();
     image.src = 'data:image/jpeg;base64,' + data;
-    console.log(image.src);
     document.body.appendChild(image);
 }
 
