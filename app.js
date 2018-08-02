@@ -3,7 +3,6 @@ const DEBUGGING = true;
 const express = require('express');
 const app = express();
 const scraper = require('./scraper.js');
-const screenshot = require('./screenshot.js');
 
 require('express-ws')(app);
 
