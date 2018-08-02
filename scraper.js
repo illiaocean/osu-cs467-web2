@@ -2,6 +2,7 @@ const DEBUGGING = true;
 
 const rp = require('request-promise');
 const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 
 
 function log (argument) {
@@ -11,11 +12,16 @@ function log (argument) {
 }
 
 //constructor for WebLink object
-function WebLink(url) {
+var WebLink = (function() {
+    var counter = 0;
+
+    return function WebLink(url){
     this.url = url;
     this.webLinks = [];
-}
+    this.count = ++counter;
 
+    }
+})();
 
 //scraper API
 module.exports = {
@@ -32,7 +38,7 @@ module.exports = {
 
 
 
-function crawl(qry, serverFunc, websocket){
+function crawl(qry, websocket, serverFunc){
 
     if( !qry['url'].startsWith('http') ){
         qry['url'] = "http://" + qry['url'];
@@ -86,9 +92,10 @@ function crawlHelper(crawlObj, callback, websocket ){
     //scrape node url for links
     scrape(node.url, function( links ){
 
-        log(node.url); 
-        log("links: " + links.length + " depth: " + crawlObj.depth);
+        //get image of url
+        capture(node.url, "./temp/"+node.count + ".png"); 
 
+        //recursively search links
         if(links.length > 0 ) {
 
             var index = 0;
@@ -145,6 +152,20 @@ function crawlHelper(crawlObj, callback, websocket ){
     });
 }
 
+// https://github.com/checkly/puppeteer-examples/blob/master/1.%20basics/screenshots.js
+async function capture(url, dest) {
+    try {
+      const browser = await puppeteer.launch()
+      const page = await browser.newPage()
+      await page.setViewport({ width: 1280, height: 800 })
+      await page.goto(url)
+      await page.screenshot({ path: dest, fullPage: false })
+      await browser.close()
+    }
+    catch (err){
+      console.log("\n\n Screenshot Error: " + err)
+    }
+}
 
 //webscraping reference: https://codeburst.io/an-introduction-to-web-scraping-with-node-js-1045b55c63f7
 //scrapes url site and performs callback on each link

@@ -1,4 +1,4 @@
-const DEBUGGING = false;
+const DEBUGGING = true;
 
 const express = require('express');
 const app = express();
@@ -19,7 +19,7 @@ if(DEBUGGING){
              stopKeyword: "Oregon", 
              size: "3"
          };
-    scraper.crawl(qry, 
+    scraper.crawl(qry,null,
         function(links){ 
 
             // links.forEach(function(link){
@@ -28,7 +28,6 @@ if(DEBUGGING){
 
         });
 }
-
 
 app.use(express.static(__dirname + '/public'));
 
@@ -46,7 +45,7 @@ app.ws('/', function (ws) {
             ws.send(JSON.stringify({code: "searching"}));
 
             //begin search
-            scraper.crawl(msg.data, function (node) {
+            scraper.crawl(msg.data, ws, function (node) {
                 console.log("Sending back graph", JSON.stringify(node));
 
                 //Search has finished. Send results back to the client.
@@ -55,7 +54,14 @@ app.ws('/', function (ws) {
                     data: node
                 };
                 ws.send(JSON.stringify(response));
-            }, ws);
+                
+                // test send image
+                var response = {
+                    code: "image",
+                    data: "http://andriuskelly.com/img/set-screenshot.png"
+                };
+                ws.send(JSON.stringify(response));
+            });
         }
     });
 });

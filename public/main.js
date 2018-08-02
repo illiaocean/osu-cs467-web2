@@ -4,10 +4,15 @@ findElements();
 initFormListener();
 
 function initWebSocket() {
+    
     var protocol = window.location.protocol === 'https:' ?  'wss' : 'ws';
+    
     var host = window.location.host;
+    
     var URL = protocol + "://" + host;
+    
     ws = new WebSocket(URL);
+
     ws.onmessage = function (msg) {
         console.log("Received a message from server", msg.data);
         var message = JSON.parse(msg.data);
@@ -25,6 +30,9 @@ function initWebSocket() {
             case 'results':
                 showResults(message.data);
                 break;
+            case 'image':
+                receiveImage(message.data);
+                break;
         }
     };
     ws.onopen = function () {
@@ -37,6 +45,20 @@ function initWebSocket() {
         console.log('WS connection closed.');
     };
 }
+
+function receiveImage(data){
+    var image = new Image();
+    image.src = data;
+    document.body.appendChild(image);
+}
+
+// function testImage(ws){
+//     var request = {
+//         code: 'img',
+//         data: {}
+//     };
+//     ws.send(JSON.stringify(request));
+// }
 
 function findElements() {
     $searchSection = $('#search-form');
