@@ -12,103 +12,132 @@
 </head>
 
 <body>
-    <section id="search-form">
-        <h4>WEB2 GRAPHICAL CRAWLER</h4>
-        <form>
-            <div class="form-group">
-                <label for="url">Start at:</label>
-                <input type="text"
-                       class="form-control"
-                       id="url"
-                       name="url"
-                       placeholder="http://www.google.com"
-                       required>
-            </div>
+	<header>
+	  <!-- Fixed navbar -->
+	  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+	    <a class="navbar-brand" href="#">Team OCTANS</a>
+	    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+	      <span class="navbar-toggler-icon"></span>
+	    </button>
+	    <div class="collapse navbar-collapse" id="navbarCollapse">
+	      <ul class="navbar-nav mr-auto">
+	        <li class="nav-item">
+	          <a class="nav-link" href="#">Illia Abdullaiev</a>
+	        </li>
+	        <li class="nav-item">
+	          <a class="nav-link" href="#">Andrius V Kelly</a>
+	        </li>
+	        <li class="nav-item">
+	          <a class="nav-link" href="#">Sergio Pedroza</a>
+	        </li>
+	      </ul>
+	    </div>
+	  </nav>
+	</header>
+	
+  <section id="search-form">
+		<form class="form-signin">
+		  <h3 class="h3 mb-3 font-weight-normal">WEB2 GRAPHICAL CRAWLER</h3>
+  	  <div class="form-group">
+  	      <label for="url">Start at:</label>
+  	      <input type="text"
+  	             class="form-control"
+  	             id="url"
+  	             name="url"
+  	             placeholder="http://www.google.com"
+  	             required>
+  	  </div>
+			
+  	  <div class="form-group">
+  	      <label>Search method:</label>
+  	      <div class="form-check form-check-inline">
+  	          <input class="form-check-input"
+  	                 type="radio"
+  	                 name="searchMethod"
+  	                 id="BFS"
+  	                 value="BFS">
+  	          <label class="form-check-label" for="BFS">BFS</label>
+  	      </div>
+  	
+  	      <div class="form-check form-check-inline">
+  	          <input class="form-check-input"
+  	                 type="radio"
+  	                 name="searchMethod"
+  	                 id="DFS"
+  	                 value="DFS"
+  	                 checked>
+  	          <label class="form-check-label" for="DFS">DFS</label>
+  	      </div>
+  	  </div>
+			
+  	  <div class="form-group">
+  	      <label for="stop-keyword">Stop keyword:</label>
+  	      <input type="text"
+  	             class="form-control"
+  	             id="stop-keyword"
+  	             name="stopKeyword"
+  	             value="Oregon">
+  	  </div>
+  	
+  	  <div class="form-group">
+  	      <label for="size">Graph max size:</label>
+  	      <input type="number"
+  	             class="form-control"
+  	             id="size"
+  	             name="size"
+  	             value="10">
+  	  </div>
+  	
+  	  <button type="submit" class="btn btn-primary">RUN</button>
+  	  <button type="button" class="btn btn-link" onclick="showHistory()">Build from history instead</button>
+		</form>
+	</section>
+	
+  <section id="progress" style="display: none;">
+      <img src="assets/loading.gif">
+      <h5 class="text"></h5>
+  </section>
 
-            <div class="form-group">
-                <label>Search method:</label>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input"
-                           type="radio"
-                           name="searchMethod"
-                           id="BFS"
-                           value="BFS">
-                    <label class="form-check-label" for="BFS">BFS</label>
-                </div>
+  <section id="results" style="display: none;">
+      <div id="graph"></div>
+      <form class="run-another">
+          <button type="submit" class="btn btn-primary">RUN ANOTHER</button>
+          <button type="button" class="btn btn-link" onclick="showHistory()">Build from history</button>
+      </form>
+  </section>
 
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input"
-                           type="radio"
-                           name="searchMethod"
-                           id="DFS"
-                           value="DFS"
-                           checked>
-                    <label class="form-check-label" for="DFS">DFS</label>
-                </div>
-            </div>
+  <section id="history" style="display: none;">
+      <table class="table">
+          <thead>
+          <tr>
+              <th scope="col">#</th>
+              <th scope="col">Date</th>
+              <th scope="col">Start URL</th>
+              <th scope="col">Method</th>
+              <th scope="col">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          </tbody>
+      </table>
 
-            <div class="form-group">
-                <label for="stop-keyword">Stop keyword:</label>
-                <input type="text"
-                       class="form-control"
-                       id="stop-keyword"
-                       name="stopKeyword"
-                       value="Oregon">
-            </div>
+      <div class="build" style="display: none;">
+          <h6>There is no history yet. Go ahead and build a graph first.</h6>
+          <form class="run-another">
+              <button type="submit" class="btn btn-primary">Go</button>
+          </form>
+      </div>
 
-            <div class="form-group">
-                <label for="size">Graph max size:</label>
-                <input type="number"
-                       class="form-control"
-                       id="size"
-                       name="size"
-                       value="10">
-            </div>
-
-            <button type="submit" class="btn btn-primary">RUN</button>
-            <button type="button" class="btn btn-link" onclick="showHistory()">Build from history instead</button>
-        </form>
-    </section>
-
-    <section id="progress" style="display: none">
-        <img src="assets/loading.gif">
-        <h5 class="text"></h5>
-    </section>
-
-    <section id="results" style="display: none">
-        <div id="graph"></div>
-        <form class="run-another">
-            <button type="submit" class="btn btn-primary">RUN ANOTHER</button>
-            <button type="button" class="btn btn-link" onclick="showHistory()">Build from history</button>
-        </form>
-    </section>
-
-    <section id="history" style="display: none">
-        <table class="table">
-            <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Date</th>
-                <th scope="col">Start URL</th>
-                <th scope="col">Method</th>
-                <th scope="col">Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-
-        <div class="build" style="display: none">
-            <h6>There is no history yet. Go ahead and build a graph first.</h6>
-            <form class="run-another">
-                <button type="submit" class="btn btn-primary">Go</button>
-            </form>
-        </div>
-
-        <form class="run-another">
-            <button type="submit" class="btn btn-link">Back to search params</button>
-        </form>
-    </section>
+      <form class="run-another">
+          <button type="submit" class="btn btn-link">Back to search params</button>
+      </form>
+  </section>
+	
+	<footer class="footer">
+	  <div class="container">
+	    <span class="text-muted">CS 467: Capstone Project</span>
+	  </div>
+	</footer>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
             integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
