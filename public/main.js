@@ -95,6 +95,7 @@ function onFormSubmit(event) {
 
 function showProgress() {
     $('section').hide();
+    $progress.find('.text')[0].innerText = ``;
     $progress.show();
 }
 
@@ -137,7 +138,15 @@ function buildGraph(graph) {
         //     enabled: true,
         //     filter: 'physics',
         //     showButton: true
-        // }
+        // },
+        "physics": {
+            "barnesHut": {
+                "springLength": 215,
+                "damping": 0.06,
+                "avoidOverlap": 0.28
+            },
+            "minVelocity": 0.75
+        }
     };
     var network = new vis.Network(container, data, options);
 
@@ -169,7 +178,8 @@ function traverse(links, node) {
         return;
     }
 
-    links[node.url] = links._count++;
+    links[node.url] = node;
+    node.id = links._count++;
 
     if (node.webLinks) {
         node.webLinks.forEach(function (child) {
@@ -183,10 +193,15 @@ function getGraphNodes(links) {
 
     for (var url in links) {
         if (links.hasOwnProperty(url)) {
+            var node = links[url];
+            var defaultIcon = 'assets/default-icon.png';
             linksArray.push({
-                id: links[url],
-                label: url.length > 20 ? url.substring(0, 20) + "..." : url,
-                title: url
+                id: node.id,
+                label: node.title,
+                title: url,
+                shape: 'circularImage',
+                image: node.favicon || defaultIcon,
+                brokenImage: defaultIcon
             });
         }
     }
@@ -207,8 +222,8 @@ function addEdges(edges, links, node) {
 
     node.webLinks.forEach(function (child) {
         edges.push({
-            from: links[node.url],
-            to: links[child.url]
+            from: links[node.url].id,
+            to: links[child.url].id
         });
         addEdges(edges, links, child);
     });
