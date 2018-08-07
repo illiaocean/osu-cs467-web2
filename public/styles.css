@@ -1,11 +1,19 @@
 body {
+
+}
+
+.content-wrapper {
+  margin-top: 56px;
+  padding: 25px;
+  height: calc(100vh - 56px);
   overflow-y: scroll;
-  overflow-x: hidden;
-	padding-top: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 150px;
+}
+
+.content-wrapper.no-flex {
+  display: block;
 }
 
 .form-signin {
@@ -41,8 +49,8 @@ body {
 }
 
 #graph {
-  width: 80vw;
-  height: 80vh;
+  width: calc(100vw - 50px);
+  height: calc(100vh - 170px);
   border: 1px solid grey;
 }
 

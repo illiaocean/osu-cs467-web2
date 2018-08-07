@@ -1,4 +1,4 @@
-var ws, $searchSection, $form, $progress, $results, $history;
+var ws, $contentWrapper, $searchSection, $form, $progress, $results, $history;
 initWebSocket();
 findElements();
 initFormListener();
@@ -30,9 +30,10 @@ function initWebSocket() {
             case 'results':
                 showResults(message.data);
                 break;
-            case 'image':
-                receiveImage(message.data);
-                break;
+            //comment out images for now since we decided to go with favicons
+            // case 'image':
+                // receiveImage(message.data);
+                // break;
         }
     };
     ws.onopen = function () {
@@ -58,16 +59,25 @@ function findElements() {
     $progress = $('#progress');
     $results = $('#results');
     $history = $('#history');
+    $contentWrapper = $('.content-wrapper');
 }
 
 function initFormListener() {
     $form.submit(onFormSubmit);
     $('.run-another').on('submit', function (event) {
-        event.preventDefault();
-        $form[0].reset();
-        $('section').hide();
-        $searchSection.show();
+        showSearchPage(event);
     });
+    $('.home-link').click(function (event) {
+        showSearchPage(event);
+    });
+}
+
+function showSearchPage(event) {
+    event.preventDefault();
+    $form[0].reset();
+    $('section').hide();
+    $contentWrapper.removeClass('no-flex');
+    $searchSection.show();
 }
 
 function onFormSubmit(event) {
@@ -108,6 +118,7 @@ function buildGraphFromHistory(event) {
     var graphs = JSON.parse(localStorage.getItem('history'));
     var graph = graphs[index].graph;
     $('section').hide();
+    $contentWrapper.removeClass('no-flex');
     $results.show();
     buildGraph(graph);
 }
@@ -217,6 +228,7 @@ function saveToHistory(graph) {
 
 function showHistory() {
     $('section').hide();
+    $contentWrapper.addClass('no-flex');
     $history.show();
     fillHistoryTable();
 }
