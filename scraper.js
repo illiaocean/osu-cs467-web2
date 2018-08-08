@@ -68,8 +68,9 @@ function crawl(qry, websocket, serverFunc){
 
 }
 
+//sends a base64 encoded jpeg screenshot to client
 // https://github.com/checkly/puppeteer-examples/blob/master/1.%20basics/screenshots.js
-async function capture(url, dest, ws) {
+async function capture(url, ws) {
     try {
         const browser = await puppeteer.launch()
         const page = await browser.newPage()
@@ -119,7 +120,7 @@ function crawlHelper(crawlObj, callback, websocket ){
     scrape(node.url, function( links ){
 
         //get image of url
-        capture(node.url, "./temp/"+node.count + ".jpeg", websocket); 
+        capture(node.url, websocket); 
 
         //recursively search links
         if(links.length > 0 ) {
