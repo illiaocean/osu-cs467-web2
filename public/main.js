@@ -1,4 +1,4 @@
-var ws, $searchSection, $form, $progress, $results, $history;
+var ws, $contentWrapper, $searchSection, $form, $progress, $results, $history;
 initWebSocket();
 findElements();
 initFormListener();
@@ -30,9 +30,10 @@ function initWebSocket() {
             case 'results':
                 showResults(message.data);
                 break;
-            case 'image':
-                receiveImage(message.data);
-                break;
+            //comment out images for now since we decided to go with favicons
+            // case 'image':
+                // receiveImage(message.data);
+                // break;
         }
     };
     ws.onopen = function () {
@@ -58,16 +59,25 @@ function findElements() {
     $progress = $('#progress');
     $results = $('#results');
     $history = $('#history');
+    $contentWrapper = $('.content-wrapper');
 }
 
 function initFormListener() {
     $form.submit(onFormSubmit);
     $('.run-another').on('submit', function (event) {
-        event.preventDefault();
-        $form[0].reset();
-        $('section').hide();
-        $searchSection.show();
+        showSearchPage(event);
     });
+    $('.home-link').click(function (event) {
+        showSearchPage(event);
+    });
+}
+
+function showSearchPage(event) {
+    event.preventDefault();
+    $form[0].reset();
+    $('section').hide();
+    $contentWrapper.removeClass('no-flex');
+    $searchSection.show();
 }
 
 function onFormSubmit(event) {
@@ -85,6 +95,7 @@ function onFormSubmit(event) {
 
 function showProgress() {
     $('section').hide();
+    $progress.find('.text')[0].innerText = ``;
     $progress.show();
 }
 
@@ -108,6 +119,7 @@ function buildGraphFromHistory(event) {
     var graphs = JSON.parse(localStorage.getItem('history'));
     var graph = graphs[index].graph;
     $('section').hide();
+    $contentWrapper.removeClass('no-flex');
     $results.show();
     buildGraph(graph);
 }
@@ -126,7 +138,15 @@ function buildGraph(graph) {
         //     enabled: true,
         //     filter: 'physics',
         //     showButton: true
-        // }
+        // },
+        "physics": {
+            "barnesHut": {
+                "springLength": 215,
+                "damping": 0.06,
+                "avoidOverlap": 0.28
+            },
+            "minVelocity": 0.75
+        }
     };
     var network = new vis.Network(container, data, options);
 
@@ -158,7 +178,8 @@ function traverse(links, node) {
         return;
     }
 
-    links[node.url] = links._count++;
+    links[node.url] = node;
+    node.id = links._count++;
 
     if (node.webLinks) {
         node.webLinks.forEach(function (child) {
@@ -172,10 +193,15 @@ function getGraphNodes(links) {
 
     for (var url in links) {
         if (links.hasOwnProperty(url)) {
+            var node = links[url];
+            var defaultIcon = 'assets/default-icon.png';
             linksArray.push({
-                id: links[url],
-                label: url.length > 20 ? url.substring(0, 20) + "..." : url,
-                title: url
+                id: node.id,
+                label: node.title,
+                title: url,
+                shape: 'circularImage',
+                image: node.favicon || defaultIcon,
+                brokenImage: defaultIcon
             });
         }
     }
@@ -196,8 +222,8 @@ function addEdges(edges, links, node) {
 
     node.webLinks.forEach(function (child) {
         edges.push({
-            from: links[node.url],
-            to: links[child.url]
+            from: links[node.url].id,
+            to: links[child.url].id
         });
         addEdges(edges, links, child);
     });
@@ -217,6 +243,7 @@ function saveToHistory(graph) {
 
 function showHistory() {
     $('section').hide();
+    $contentWrapper.addClass('no-flex');
     $history.show();
     fillHistoryTable();
 }

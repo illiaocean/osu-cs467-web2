@@ -1,10 +1,39 @@
 body {
-  height: 100vh;
+
+}
+
+.content-wrapper {
+  margin-top: 56px;
+  padding: 25px;
+  height: calc(100vh - 56px);
   overflow-y: scroll;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
+.content-wrapper.no-flex {
+  display: block;
+}
+
+.form-signin {
+  width: 100%;
+  padding: 5px;
+  margin: auto;
+}
+.form-signin .checkbox {
+  font-weight: 400;
+}
+.form-signin .form-control {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+}
+.form-signin .form-control:focus {
+  z-index: 2;
+} 
 
 #search-form {
   max-width: 350px;
@@ -20,8 +49,8 @@ body {
 }
 
 #graph {
-  width: 80vw;
-  height: 80vh;
+  width: calc(100vw - 50px);
+  height: calc(100vh - 170px);
   border: 1px solid grey;
 }
 
@@ -35,6 +64,6 @@ body {
 }
 
 #history table {
-  width: 90%;
+  width: 100%;
   margin: 0 auto;
 }
