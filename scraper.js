@@ -43,41 +43,29 @@ function crawl(qry, websocket, serverFunc) {
 
     var searchMethod = qry['searchMethod'].toLowerCase();
 
+
+    var crawlInfo = {
+        depth: parseInt(qry['size']),
+        visited: new Map(),
+        visiting: new Map(),
+        method: searchMethod,
+        queue: new Queue(),
+    }
+
+    var rootNode = new WebLink(qry['url']);
+
+    //add root
+    crawlInfo.queue.enqueue(rootNode);
+    crawlInfo.visiting.set(qry['url'], rootNode);
+
+
     if (searchMethod == 'dfs') {
 
-        var crawlInfo = {
-            depth: parseInt(qry['size']),
-            visited: new Map(),
-            visiting: new Map(),
-            method: searchMethod,
-            queue: new Queue(),
-        }
-
-        var rootNode = new WebLink(qry['url']);
-
-        //add root
-        crawlInfo.queue.enqueue(rootNode);
-        crawlInfo.visiting[qry['url']] = rootNode;
-
-        DFS(crawlInfo, function () {
+        DFS(rootNode, crawlInfo, function () {
             serverFunc(rootNode);
         }, websocket);
     }
     else if (searchMethod == 'bfs') {
-
-        var crawlInfo = {
-            depth: parseInt(qry['size']),
-            visited: new Map(),
-            visiting: new Map(),
-            method: searchMethod,
-            queue: new Queue(),
-        }
-
-        var rootNode = new WebLink(qry['url']);
-
-        //add root
-        crawlInfo.queue.enqueue(rootNode);
-        crawlInfo.visiting[qry['url']] = rootNode;
 
         BFS(crawlInfo, function () {
             serverFunc(rootNode);
@@ -89,10 +77,23 @@ function crawl(qry, websocket, serverFunc) {
 
 }
 
-function BFS(crawlObj, callback, websocket) {
+function updateClientCount(websocket, n){
+    if (websocket) {
+        //send update to client
+        websocket.send(JSON.stringify({
+            code: 'progressUpdated',
+            data: {
+                // url: link,
+                count: n
+            }
+        }));
+    }
+}
+
+function BFS(crawlInfo, callback, websocket) {
 
     //get node depending on search method
-    var node = crawlObj.queue.dequeue();
+    var node = crawlInfo.queue.dequeue();
 
     //scrape node url for links
     scrape(node.url, function (links, title, favicon) {
@@ -100,17 +101,18 @@ function BFS(crawlObj, callback, websocket) {
         node.title = title;
         node.favicon = favicon;
 
-        if (crawlObj.depth == crawlObj.visited.size) {
-            log("\n\n ==========  server callback  ==========\n\n");
+        crawlInfo.visiting.delete(node.url);
 
-            while (!crawlObj.queue.isEmpty) {  //eliminate further calls
-                crawlObj.queue.dequeue();
+        if (crawlInfo.depth <= crawlInfo.visited.size){
+
+            // while (!crawlInfo.queue.isEmpty) {  //eliminate further calls
+            //     crawlInfo.queue.dequeue();
+            // }           
+
+            if ( crawlInfo.visiting.size == 0) {
+                log("\n\n ==========  server callback  ==========\n\n");
+                callback();
             }
-
-            callback();
-            return;
-        }
-        else if (crawlObj.depth < crawlObj.visited.size) {    //prevents inf recursion
             return;
         }
 
@@ -120,110 +122,13 @@ function BFS(crawlObj, callback, websocket) {
             var index = 0;
 
             //loops through links if bfs, else only once on index
-             while (index < links.length && crawlObj.depth > crawlObj.visited.size ) {
+            while ( index < links.length && crawlInfo.visited.size < crawlInfo.depth) {
+                
                 var link = links[index];
 
-                if (!( link in crawlObj.visited)) {
+                if ( !( link in crawlInfo.visited) ) {
 
-                    crawlObj.visited.set(link, node);
-
-                    if (websocket) {
-                        //send update to client
-                        websocket.send(JSON.stringify({
-                            code: 'progressUpdated',
-                            data: {
-                                // url: link,
-                                count: crawlObj.visited.size
-                            }
-                        }));
-                    }
-
-                    //append node with child link node
-                    const childNode = new WebLink(link)
-                    node.children.push(childNode);
-
-                    crawlObj.queue.enqueue(childNode);
-
-                    BFS(crawlObj, callback, websocket);
-                }
-                ++index;
-            }
-        }
-    });
-}
-
-//performs bfs or dfs crawl
-function DFS(crawlInfo, callback, websocket) {
-
-    if( !crawlInfo.queue.isEmpty() ){
-
-        //get node depending on search method
-        var node = crawlInfo.queue.dequeue();
-
-
-        //scrape node url for links
-        scrape( node.url, function (links, title, favicon) {
-
-            node.title = title;
-            node.favicon = favicon;
-            node.links = links;
-
-            crawlInfo.visited.set(node.url, node);
-            crawlInfo.visiting.delete(node.url);
-
-            var index = 0;  //index for looping links
-
-            //handle dfs case
-            if (crawlInfo.method == 'dfs') {
-
-                //if dfs has no links, move node pointer up tree
-                if (links.length == 0 && node.parentLink ){
-                    do {                    
-                        console.log("Moving up tree to node: " + node.parentLink)
-
-                        node = crawlInfo.visited.get(node.parentLink);
-
-                        links = node.links;
-
-                        //make sure at least 1 unvisited
-                        for (var l in links ) {
-                            if ( !crawlInfo.visited.has(l)){
-                                break;
-                            }
-                        }
-                    } while ( node.parentLink )
-                }
-                else if (links.length == 0 ){
-                    return; //no links and no parent, exit scrape
-                }
-
-                //get random index for dfs
-                index = Math.floor(Math.random() * links.length);
-                //make sure not visited
-                while (links.length > 0 && crawlInfo.visited.has(links[index])  ) {
-                    links.splice(index, 1);
-                    index = Math.floor(Math.random() * links.length)
-                }
-            }
-
-
-            //loops through if bfs, else only once on index
-            do {
-                var link = links[index];
-
-                if(crawlInfo.depth <= crawlInfo.visited.size) break;
-
-                if ( !crawlInfo.visited.has(link) ) {
-
-                    if (websocket) { 	//send update to client
-                        websocket.send(JSON.stringify({
-                            code: 'progressUpdated',
-                            data: {
-                                // url: link,
-                                count: crawlInfo.visited.size
-                            }
-                        }));
-                    }
+                    updateClientCount(websocket, crawlInfo.visited.size);
 
                     //append node with child link node
                     const childNode = new WebLink(link, node.url);
@@ -233,37 +138,92 @@ function DFS(crawlInfo, callback, websocket) {
                     crawlInfo.queue.enqueue(childNode);
 
                     crawlInfo.visiting.set(link, childNode);
+                    crawlInfo.visited.set(link, childNode);
 
-                    DFS(crawlInfo, callback, websocket);
+                    BFS(crawlInfo, callback, websocket);
                 }
-
                 ++index;
-
-            } while (crawlInfo.method != 'dfs' && index < links.length);
-
-            //test condition for last node
-            if (crawlInfo.depth <= crawlInfo.visited.size ){
-
-            	//clear out queue
-            	while( !crawlInfo.queue.isEmpty() ){
-            		delete crawlInfo.queue.dequeue();
-            	}
-
-				if (crawlInfo.visiting.size == 0){
-	                //make sure only gets called once
-	                log("\n ==========  server callback  ==========\n");
-	                callback();
-	                return;
-	            }
             }
-        });
-    }
+        }
+    });
 }
 
-/*
+//performs bfs or dfs crawl
+function DFS(node, crawlInfo, callback, websocket) {
+
+    //scrape node url for links
+    scrape(node.url, function (links, title, favicon) {
+
+        node.title = title;
+        node.favicon = favicon;
+        node.links = links;
+
+        crawlInfo.visited.set(node.url, node);
+        crawlInfo.visiting.delete(node.url);
 
 
-            */
+        //if dfs has no links, move node pointer up tree
+        if (links.length == 0 && node.parentLink ){
+            do {                    
+                console.log("Moving up tree to node: " + node.parentLink)
+
+                node = crawlInfo.visited.get(node.parentLink);
+
+                links = node.links;
+
+                //make sure at least 1 unvisited
+                for (var l in links ) {
+                    if ( !crawlInfo.visited.has(l)) {
+                        break;
+                    }
+                }
+            } while ( node.parentLink )
+        }
+        else if (links.length == 0 ){
+            return; //no links and no parent, exit scrape
+        }
+
+
+        var index = 0;  //index for looping links
+        //get random index for dfs
+        index = Math.floor(Math.random() * links.length);
+        //make sure not visited
+        while (links.length > 0 && crawlInfo.visited.has(links[index])  ) {
+            links.splice(index, 1);
+            index = Math.floor(Math.random() * links.length)
+        }
+
+        //loops through if bfs, else only once on index
+        var link = links[index];
+
+        if ( !crawlInfo.visited.has(link) && crawlInfo.depth > crawlInfo.visited.size ) {
+
+            updateClientCount(websocket, crawlInfo.visited.size);
+
+            //append node with child link node
+            const childNode = new WebLink(link, node.url);
+
+            node.children.push(childNode);
+
+            crawlInfo.visiting.set(link, childNode);
+
+            DFS(childNode, crawlInfo, callback, websocket);
+        }
+
+
+        //test condition for last node
+        if (crawlInfo.depth <= crawlInfo.visited.size ){
+
+			if (crawlInfo.visiting.size == 0){
+                //make sure only gets called once
+                log("\n ==========  server callback  ==========\n");
+                callback();
+                return;
+            }
+        }
+    });
+}
+
 
 //sends a base64 encoded jpeg screenshot to client
 // https://github.com/checkly/puppeteer-examples/blob/master/1.%20basics/screenshots.js
@@ -378,6 +338,8 @@ function scrape(url, callback) {
             console.log("Request " + reason.cause);
             callback([], "", "");
         });
+
+        console.log("scraped " + url);
 
     return links;
 }

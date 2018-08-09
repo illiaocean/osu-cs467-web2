@@ -10,24 +10,6 @@ require('express-ws')(app);
 let port = process.env.PORT || process.argv[2] || 3000;
 app.set('port', port);
 
-//pass in callback function to handle links
-if(DEBUGGING){      
-    qry = {  
-             url: 'https://en.wikipedia.org/wiki/Special:Random', 
-             searchMethod: "bfs", 
-             stopKeyword: "Oregon", 
-             size: "3"
-         };
-    scraper.crawl(qry,null,
-        function(links){ 
-
-            // links.forEach(function(link){
-                console.log(links);
-            // }); 
-
-        });
-}
-
 app.use(express.static(__dirname + '/public'));
 
 //client-server communication via websockets
