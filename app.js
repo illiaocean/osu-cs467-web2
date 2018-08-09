@@ -32,8 +32,11 @@ app.use(express.static(__dirname + '/public'));
 
 //client-server communication via websockets
 app.ws('/', function (ws) {
+
     ws.on('message', function (msg) {
+
         console.log("Server received message", msg);
+
         msg = JSON.parse(msg);
 
         if (msg.code === 'search') {
@@ -42,7 +45,7 @@ app.ws('/', function (ws) {
 
             //begin search
             scraper.crawl(msg.data, ws, function (node) {
-                console.log("Sending back graph", JSON.stringify(node));
+                log("Sending back graph", JSON.stringify(node));
 
                 //Search has finished. Send results back to the client.
                 var response = {

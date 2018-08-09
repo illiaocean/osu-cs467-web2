@@ -181,8 +181,8 @@ function traverse(links, node) {
     links[node.url] = node;
     node.id = links._count++;
 
-    if (node.webLinks) {
-        node.webLinks.forEach(function (child) {
+    if (node.children) {
+        node.children.forEach(function (child) {
             traverse(links, child);
         });
     }
@@ -216,11 +216,11 @@ function getGraphEdges(links, node) {
 }
 
 function addEdges(edges, links, node) {
-    if (!node.webLinks) {
+    if (!node.children) {
         return;
     }
 
-    node.webLinks.forEach(function (child) {
+    node.children.forEach(function (child) {
         edges.push({
             from: links[node.url].id,
             to: links[child.url].id
