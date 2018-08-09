@@ -43,17 +43,21 @@ app.ws('/', function (ws) {
             //notify the client that request has been accepted
             ws.send(JSON.stringify({code: "searching"}));
 
+            var callbackFlag = true; //prevent redundant callbacks
+
             //begin search
             scraper.crawl(msg.data, ws, function (node) {
-                log("Sending back graph", JSON.stringify(node));
+                if (DEBUGGING) console.log("Sending back graph", JSON.stringify(node));
 
                 //Search has finished. Send results back to the client.
-                var response = {
-                    code: "results",
-                    data: node
-                };
-                ws.send(JSON.stringify(response));
-
+                if (callbackFlag){
+                    callbackFlag = false;
+                    var response = {
+                        code: "results",
+                        data: node
+                    };
+                    ws.send(JSON.stringify(response));
+                }
             });
         }
     });

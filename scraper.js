@@ -43,7 +43,7 @@ function crawl(qry, websocket, serverFunc) {
 
     var searchMethod = qry['searchMethod'].toLowerCase();
 
-    if (searchMethod == 'dfs' || 'bfs') {
+    if (searchMethod == 'dfs') {
 
         var crawlInfo = {
             depth: parseInt(qry['size']),
@@ -59,7 +59,27 @@ function crawl(qry, websocket, serverFunc) {
         crawlInfo.queue.enqueue(rootNode);
         crawlInfo.visiting[qry['url']] = rootNode;
 
-        crawlRecursive(crawlInfo, function () {
+        DFS(crawlInfo, function () {
+            serverFunc(rootNode);
+        }, websocket);
+    }
+    else if (searchMethod == 'bfs') {
+
+        var crawlInfo = {
+            depth: parseInt(qry['size']),
+            visited: new Map(),
+            visiting: new Map(),
+            method: searchMethod,
+            queue: new Queue(),
+        }
+
+        var rootNode = new WebLink(qry['url']);
+
+        //add root
+        crawlInfo.queue.enqueue(rootNode);
+        crawlInfo.visiting[qry['url']] = rootNode;
+
+        BFS(crawlInfo, function () {
             serverFunc(rootNode);
         }, websocket);
     }
@@ -69,14 +89,77 @@ function crawl(qry, websocket, serverFunc) {
 
 }
 
+function BFS(crawlObj, callback, websocket) {
+
+    //get node depending on search method
+    var node = crawlObj.queue.dequeue();
+
+    //scrape node url for links
+    scrape(node.url, function (links, title, favicon) {
+
+        node.title = title;
+        node.favicon = favicon;
+
+        if (crawlObj.depth == crawlObj.visited.size) {
+            log("\n\n ==========  server callback  ==========\n\n");
+
+            while (!crawlObj.queue.isEmpty) {  //eliminate further calls
+                crawlObj.queue.dequeue();
+            }
+
+            callback();
+            return;
+        }
+        else if (crawlObj.depth < crawlObj.visited.size) {    //prevents inf recursion
+            return;
+        }
+
+        //recursively search links
+        if (links.length > 0) {
+
+            var index = 0;
+
+            //loops through links if bfs, else only once on index
+             while (index < links.length && crawlObj.depth > crawlObj.visited.size ) {
+                var link = links[index];
+
+                if (!( link in crawlObj.visited)) {
+
+                    crawlObj.visited.set(link, node);
+
+                    if (websocket) {
+                        //send update to client
+                        websocket.send(JSON.stringify({
+                            code: 'progressUpdated',
+                            data: {
+                                // url: link,
+                                count: crawlObj.visited.size
+                            }
+                        }));
+                    }
+
+                    //append node with child link node
+                    const childNode = new WebLink(link)
+                    node.children.push(childNode);
+
+                    crawlObj.queue.enqueue(childNode);
+
+                    BFS(crawlObj, callback, websocket);
+                }
+                ++index;
+            }
+        }
+    });
+}
 
 //performs bfs or dfs crawl
-function crawlRecursive(crawlInfo, callback, websocket) {
+function DFS(crawlInfo, callback, websocket) {
 
     if( !crawlInfo.queue.isEmpty() ){
 
         //get node depending on search method
         var node = crawlInfo.queue.dequeue();
+
 
         //scrape node url for links
         scrape( node.url, function (links, title, favicon) {
@@ -126,11 +209,9 @@ function crawlRecursive(crawlInfo, callback, websocket) {
 
             //loops through if bfs, else only once on index
             do {
-                if (crawlInfo.depth <= crawlInfo.visited.size){
-                    break;
-                }
-
                 var link = links[index];
+
+                if(crawlInfo.depth <= crawlInfo.visited.size) break;
 
                 if ( !crawlInfo.visited.has(link) ) {
 
@@ -153,7 +234,7 @@ function crawlRecursive(crawlInfo, callback, websocket) {
 
                     crawlInfo.visiting.set(link, childNode);
 
-                    crawlRecursive(crawlInfo, callback, websocket);
+                    DFS(crawlInfo, callback, websocket);
                 }
 
                 ++index;
@@ -165,7 +246,7 @@ function crawlRecursive(crawlInfo, callback, websocket) {
 
             	//clear out queue
             	while( !crawlInfo.queue.isEmpty() ){
-            		crawlInfo.queue.pop_back();
+            		delete crawlInfo.queue.dequeue();
             	}
 
 				if (crawlInfo.visiting.size == 0){
@@ -297,7 +378,6 @@ function scrape(url, callback) {
             console.log("Request " + reason.cause);
             callback([], "", "");
         });
-
 
     return links;
 }
