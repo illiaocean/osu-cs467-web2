@@ -113,7 +113,7 @@ function BFS(crawlInfo, callback, websocket) {
 
             if ( crawlInfo.visiting.size == 0) {
                 
-                if(keyword){
+                if(keyFound){
                 log("\n ==========  KEYWORD FOUND  ==========\n");
                 }
                 log("\n\n ==========  server callback  ==========\n\n");
