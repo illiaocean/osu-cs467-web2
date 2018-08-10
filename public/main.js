@@ -146,9 +146,22 @@ function buildGraph(graph) {
                 "avoidOverlap": 0.28
             },
             "minVelocity": 0.75
+        },
+        'interaction' : {
+            'hover': true
         }
     };
     var network = new vis.Network(container, data, options);
+
+    network.on('hoverNode',function(){
+        console.log("mouse over");
+        container.style.cursor = 'pointer';
+    });
+
+    network.on('blurNode', function(){
+        console.log("mouse off");
+        container.style.cursor = 'default';
+    });
 
     //Open website in a new tab on node click
     network.on( 'click', function(properties) {
