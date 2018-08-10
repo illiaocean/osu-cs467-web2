@@ -40,9 +40,7 @@ function crawl(qry, websocket, serverFunc) {
         qry['url'] = "http://" + qry['url'];
     }
 
-
     var searchMethod = qry['searchMethod'].toLowerCase();
-
 
     var crawlInfo = {
         depth: parseInt(qry['size']),
@@ -50,6 +48,7 @@ function crawl(qry, websocket, serverFunc) {
         visiting: new Map(),
         method: searchMethod,
         queue: new Queue(),
+        stopKeyword: qry['stopKeyword']
     }
 
     var rootNode = new WebLink(qry['url']);
@@ -90,26 +89,33 @@ function updateClientCount(websocket, n){
     }
 }
 
+
 function BFS(crawlInfo, callback, websocket) {
 
     //get node depending on search method
     var node = crawlInfo.queue.dequeue();
 
     //scrape node url for links
-    scrape(node.url, function (links, title, favicon) {
+    scrape(node.url, function (links, title, favicon, $) {
 
         node.title = title;
         node.favicon = favicon;
 
         crawlInfo.visiting.delete(node.url);
 
-        if (crawlInfo.depth <= crawlInfo.visited.size){
+        var keyFound = ( $ && $('body:contains("'+crawlInfo.stopKeyword+'")').length > 0 );
 
-            // while (!crawlInfo.queue.isEmpty) {  //eliminate further calls
-            //     crawlInfo.queue.dequeue();
-            // }           
+        if ( keyFound || crawlInfo.depth <= crawlInfo.visited.size ){
+
+            while (!crawlInfo.queue.isEmpty) {  //eliminate further calls
+                crawlInfo.queue.dequeue();
+            }           
 
             if ( crawlInfo.visiting.size == 0) {
+                
+                if(keyword){
+                log("\n ==========  KEYWORD FOUND  ==========\n");
+                }
                 log("\n\n ==========  server callback  ==========\n\n");
                 callback();
             }
@@ -152,7 +158,7 @@ function BFS(crawlInfo, callback, websocket) {
 function DFS(node, crawlInfo, callback, websocket) {
 
     //scrape node url for links
-    scrape(node.url, function (links, title, favicon) {
+    scrape(node.url, function (links, title, favicon, $) {
 
         node.title = title;
         node.favicon = favicon;
@@ -161,6 +167,13 @@ function DFS(node, crawlInfo, callback, websocket) {
         crawlInfo.visited.set(node.url, node);
         crawlInfo.visiting.delete(node.url);
 
+        var keyFound = ( $ && $('body:contains("'+crawlInfo.stopKeyword+'")').length > 0 );
+
+        if ( keyFound) {
+            log("\n ==========  KEYWORD FOUND  ==========\n");
+                callback();
+            return;
+        }
 
         //if dfs has no links, move node pointer up tree
         if (links.length == 0 && node.parentLink ){
@@ -212,7 +225,7 @@ function DFS(node, crawlInfo, callback, websocket) {
 
 
         //test condition for last node
-        if (crawlInfo.depth <= crawlInfo.visited.size ){
+        if (crawlInfo.depth <= crawlInfo.visited.size && !keyFound){
 
 			if (crawlInfo.visiting.size == 0){
                 //make sure only gets called once
@@ -223,6 +236,7 @@ function DFS(node, crawlInfo, callback, websocket) {
         }
     });
 }
+
 
 
 //sends a base64 encoded jpeg screenshot to client
@@ -292,29 +306,14 @@ function scrape(url, callback) {
             //TODO: implement keyword stop
             var $ = response.$;
 
-            $('a').each(function () {
-                var link = $(this).attr('href');
-                if (link) {
-                    //if link address is self-referenced, insert domain
-                    if (link.substring(0, 2) == './') {
-                        link = url + link.substring(1);
-                    }
-                    //add unique link
-                    if (link.startsWith('http') && !linkMap[link]) {
-                        links.push(link);
-                        linkMap[link] = true;
-                    }
-                }
-            });
-
+            //get webpage title
             var titleText = response.title;
-
             if (!titleText) {
                 titleText = url;
             }
-
             titleText = titleText.length > 20 ? titleText.substring(0, 20) + "..." : titleText;
 
+            //get favicon
             var $favicon = $('[rel="shortcut icon"]');
             var faviconURL;
 
@@ -324,7 +323,22 @@ function scrape(url, callback) {
                 var fullFaviconURL = new URL(faviconURL, origin);
             }
 
-            callback(links, titleText, fullFaviconURL);
+            $('a').each(function () {
+                var link = $(this).attr('href');
+                if (link) {
+                    //if link address is self-referenced, insert domain
+                    if (link.substring(0, 2) == './') {
+                        link = new URL( link.substring(1), url ).href;
+                    }
+                    //add unique link
+                    if (link.startsWith('http') && !linkMap[link]) {
+                        links.push(link);
+                        linkMap[link] = true;
+                    }
+                }
+            });
+
+            callback(links, titleText, fullFaviconURL, $);
         })
         .catch(errors.StatusCodeError, function (reason) {
         // The server responded with a status codes other than 2xx.
