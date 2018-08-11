@@ -103,7 +103,8 @@ function BFS(crawlInfo, callback, websocket) {
 
         crawlInfo.visiting.delete(node.url);
 
-        var keyFound = ( $ && $('body:contains("'+crawlInfo.stopKeyword+'")').length > 0 );
+        //look for stopKeyword in document
+        var keyFound = crawlInfo.stopKeyword != '' && ( $ && $('body:contains("'+crawlInfo.stopKeyword+'")').length > 0 );
 
         if ( keyFound || crawlInfo.depth <= crawlInfo.visited.size ){
 
@@ -167,7 +168,8 @@ function DFS(node, crawlInfo, callback, websocket) {
         crawlInfo.visited.set(node.url, node);
         crawlInfo.visiting.delete(node.url);
 
-        var keyFound = ( $ && $('body:contains("'+crawlInfo.stopKeyword+'")').length > 0 );
+        //look for stopKeyword in document
+        var keyFound = crawlInfo.stopKeyword != '' && ( $ && $('body:contains("'+crawlInfo.stopKeyword+'")').length > 0 );
 
         if ( keyFound) {
             log("\n ==========  KEYWORD FOUND  ==========\n");
