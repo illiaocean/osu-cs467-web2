@@ -1,4 +1,4 @@
-var ws, $contentWrapper, $searchSection, $form, $progress, $results, $history;
+var ws, $contentWrapper, $searchSection, $keyword, $form, $progress, $results, $history;
 initWebSocket();
 findElements();
 initFormListener();
@@ -23,6 +23,9 @@ function initWebSocket() {
                 break;
             case 'progressUpdated':
                 onProgressUpdate(message.data);
+                break;
+            case 'stopKeywordFound':
+                showStopKeyword(message.data);
                 break;
             case '404':
                 handle404();
@@ -59,6 +62,7 @@ function findElements() {
     $progress = $('#progress');
     $results = $('#results');
     $history = $('#history');
+    $keyword = $('#keyword');
     $contentWrapper = $('.content-wrapper');
 }
 
@@ -66,9 +70,11 @@ function initFormListener() {
     $form.submit(onFormSubmit);
     $('.run-another').on('submit', function (event) {
         showSearchPage(event);
+        $keyword.hide();
     });
     $('.home-link').click(function (event) {
         showSearchPage(event);
+        $keyword.hide();
     });
 }
 
@@ -107,6 +113,11 @@ function onProgressUpdate(data) {
     $progress.find('.text')[0].innerText = `Websites discovered: ${data.count}`;
 }
 
+function showStopKeyword(data) {
+    $keyword[0].innerHTML = `Stop keyword "${data.keyword}" found at <a href="${data.url}">${data.url}</a>.`;
+    $keyword.show();
+}
+
 function showResults(graph) {
     $('section').hide();
     $results.show();
@@ -119,6 +130,7 @@ function buildGraphFromHistory(event) {
     var graphs = JSON.parse(localStorage.getItem('history'));
     var graph = graphs[index].graph;
     $('section').hide();
+    $keyword.hide();
     $contentWrapper.removeClass('no-flex');
     $results.show();
     buildGraph(graph);

@@ -50,13 +50,15 @@ body {
 
 #graph {
   width: calc(100vw - 50px);
-  height: calc(100vh - 170px);
+  height: calc(100vh - 185px);
   border: 1px solid grey;
+  margin-bottom: 15px;
+  margin-top: 5px;
 }
 
 .run-another {
   text-align: center;
-  padding-top: 20px;
+  margin-top: 15px;
 }
 
 .run-another button {
@@ -66,4 +68,8 @@ body {
 #history table {
   width: 100%;
   margin: 0 auto;
+}
+
+#keyword {
+  text-align: center;
 }

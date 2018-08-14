@@ -106,17 +106,26 @@ function BFS(crawlInfo, callback, websocket) {
         //look for stopKeyword in document
         var keyFound = crawlInfo.stopKeyword != '' && ( $ && $('body:contains("'+crawlInfo.stopKeyword+'")').length > 0 );
 
-        if ( keyFound || crawlInfo.depth <= crawlInfo.visited.size ){
+        if (keyFound || crawlInfo.depth <= crawlInfo.visited.size) {
 
             while (!crawlInfo.queue.isEmpty) {  //eliminate further calls
                 crawlInfo.queue.dequeue();
-            }           
+            }
 
-            if ( crawlInfo.visiting.size == 0) {
-                
-                if(keyFound){
-                log("\n ==========  KEYWORD FOUND  ==========\n");
+            if (crawlInfo.visiting.size == 0) {
+
+                if (keyFound) {
+                    log("\n ==========  KEYWORD FOUND  ==========\n");
+
+                    websocket.send(JSON.stringify({
+                        code: 'stopKeywordFound',
+                        data: {
+                            keyword: crawlInfo.stopKeyword,
+                            url: node.url
+                        }
+                    }));
                 }
+
                 log("\n\n ==========  server callback  ==========\n\n");
                 callback();
             }
@@ -173,7 +182,14 @@ function DFS(node, crawlInfo, callback, websocket) {
 
         if ( keyFound) {
             log("\n ==========  KEYWORD FOUND  ==========\n");
-                callback();
+            websocket.send(JSON.stringify({
+                code: 'stopKeywordFound',
+                data: {
+                    keyword: crawlInfo.stopKeyword,
+                    url: node.url
+                }
+            }));
+            callback();
             return;
         }
 
