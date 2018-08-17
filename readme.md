@@ -22,8 +22,8 @@ Github: https://github.com/abdullaiev/osu-cs467-web2
      * node app.js
 
 4. open `localhost:3000` in your browser of choice.
-5. fill out the 'Start at' text field with a url that you’d like to crawl.(ex. http://www.google.com )
-6. by default, the search method, stop keyword, and graph’s max size are all preselected. Feel free to adjust these values as you see fit.
+5. fill out the `Start at` text field with a url that you'd like to crawl.(ex. http://www.google.com )
+6. by default, the search method, stop keyword, and graph's max size are all preselected. Feel free to adjust these values as you see fit.
 7. run the program!
 
 # Running In Production
@@ -31,7 +31,7 @@ Our Graphical Web Crawler is hosted on Heroku and can be reached with the URL li
 Section 1.
 
 1. visit URL: https://cs467-web2.herokuapp.com/
-2. fill out the Start at text field with a url that you’d like to crawl.(ex. http://www.google.com )
+2. fill out the `Start at` text field with a url that you’d like to crawl.(ex. http://www.google.com )
 3. by default, the search method, stop keyword, and graph’s max size are all preselected. Feel free to adjust these values as you see fit.
 4. run the program!
 
@@ -40,10 +40,10 @@ visited by our web crawler. At this point, the user will also be presented with 
 outlined in the two sections below.
 
 Section 1: Build From History
-1. to start the program from a previous selection, click on the 'Build from History' link.
+1. to start the program from a previous selection, click on the `Build from History` link.
 2. choose which URL youd like the program to rebuild from the history table.
-3. then click on it’s 'Build' button.
+3. then click on it’s `Build` button.
 
 Section 2: Restart The Program
-1. click on the 'Run Another' button.
+1. click on the `Run Another` button.
 2. and start the crawl once again!
