@@ -35,7 +35,8 @@ Section 1.
 3. by default, the search method, stop keyword, and graph’s max size are all preselected. Feel free to adjust these values as you see fit.
 4. run the program!
 
-After running the program, a graphical model will appear that demonstrate all of the sites
+# Results
+After running the program, all results will appear on a graphical model that demonstrates the sites
 visited by our web crawler. At this point, the user will also be presented with two options
 outlined in the two sections below.
 
