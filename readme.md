@@ -42,7 +42,7 @@ outlined in the two sections below.
 
 Section 1: Build From History
 1. to start the program from a previous selection, click on the `Build from History` link.
-2. choose which URL youd like the program to rebuild from the history table.
+2. choose which URL you would like the program to rebuild from the history table.
 3. then click on it’s `Build` button.
 
 Section 2: Restart The Program
