@@ -1,5 +1,4 @@
 # Description
-
 Project: WEB2 GRAPHICAL CRAWLER
 Group: Octans
 
@@ -9,10 +8,10 @@ Sergio Pedroza
 Andrius V Kelly
 
 
-# Running locally
+# Running Locally
 
 cd to project folder and install dependencies:
-`npm i`
+* npm i
 
 `request` is defined as a peer-dependency and thus has to be installed separately:
 `npm install --save request`
